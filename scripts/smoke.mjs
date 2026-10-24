@@ -70,7 +70,21 @@ const waitMode = mode => waitForEvaluation(page, async expected => {
   const { engine } = await import('/src/main.js');
   return engine.state.mode === expected;
 }, mode);
-const screenshot = name => page.screenshot({ path: path.join(artifacts, `${name}.png`) });
+// 截图自己写盘：Playwright 直接写文件在 Windows 上偶发 UNKNOWN(open)，
+// 走内存缓冲 + 一次重试就稳定了。
+const screenshot = async name => {
+  const target = path.join(artifacts, `${name}.png`);
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const buffer = await page.screenshot();
+      await writeFile(target, buffer);
+      return;
+    } catch (error) {
+      if (attempt === 3) throw error;
+      await new Promise(resolve => setTimeout(resolve, 300));
+    }
+  }
+};
 const check = name => { checks.push(name); console.log(`PASS ${name}`); };
 const assertReactorCameraClear = async target => {
   await waitForEvaluation(target, async () => {
@@ -1034,7 +1048,8 @@ try {
       const button = mobile.locator(selector);
       // 不用 scrollIntoViewIfNeeded：软件渲染只有 2fps，它会一直等"元素静止"而误判。
       // HUD 是固定定位，真正的检查是"能不能被点到"。
-      try { await button.waitFor({ state: 'visible', timeout: 8000 }); }
+      // 软件渲染下手机页面要 6–8 秒才初始化完，8 秒的窗口会偶发误判。
+      try { await button.waitFor({ state: 'visible', timeout: 25000 }); }
       catch (error) {
         await mobile.screenshot({ path: path.join(artifacts, `failure-mobile-${label}.png`) }).catch(() => {});
         throw new Error(`${label} ${selector}: ${error.message}; url=${mobile.url()}; title=${await mobile.title().catch(() => '')}`);

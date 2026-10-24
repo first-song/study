@@ -138,6 +138,46 @@ function islandGroundMaps(seed) {
 
 function clamp01(value) { return Math.max(0,Math.min(1,value)); }
 
+// 把一组静态小物件按材质合并成几个网格。
+// 岛上的日式细节（电线杆、护栏、石灯笼…）加起来有几百个网格，
+// 逐个画会白白吃掉几百个 draw call；合并后只剩十来个。
+function mergeStaticGroup(root) {
+  root.updateWorldMatrix(true, true);
+  const inverseRoot = root.matrixWorld.clone().invert();
+  const batches = new Map();
+  root.traverse(node => {
+    if (!node.isMesh || node.isInstancedMesh || node.userData.keepSeparate) return;
+    if (node.material?.transparent) return;
+    const geometry = node.geometry.clone();
+    geometry.applyMatrix4(inverseRoot.clone().multiply(node.matrixWorld));
+    const normalized = geometry.index ? geometry.toNonIndexed() : geometry;
+    if (!normalized.attributes.uv) {
+      normalized.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(normalized.attributes.position.count * 2), 2));
+    }
+    for (const attribute of Object.keys(normalized.attributes)) {
+      if (!['position', 'normal', 'uv'].includes(attribute)) normalized.deleteAttribute(attribute);
+    }
+    if (!normalized.attributes.normal) normalized.computeVertexNormals();
+    const key = node.material.uuid;
+    if (!batches.has(key)) batches.set(key, { material: node.material, geometries: [], nodes: [] });
+    const batch = batches.get(key);
+    batch.geometries.push(normalized);
+    batch.nodes.push(node);
+  });
+  for (const { material, geometries, nodes } of batches.values()) {
+    // 只有一块的批次保留原网格（它的材质独一份，合并没有意义）。
+    if (geometries.length < 2) { for (const geometry of geometries) geometry.dispose(); continue; }
+    const merged = mergeGeometries(geometries, false);
+    for (const geometry of geometries) geometry.dispose();
+    if (!merged) continue;
+    const mesh = new THREE.Mesh(merged, material);
+    mesh.name = 'merged-island-detail';
+    root.add(mesh);
+    for (const node of nodes) node.parent?.remove(node);
+  }
+  return root;
+}
+
 function islandTerrainGeometry(world) {
   const segments=192,rings=44,positions=[],colors=[],uvs=[],indices=[],color=new THREE.Color();
   const sand=new THREE.Color(0x857a60),meadow=new THREE.Color(0x405c40),forest=new THREE.Color(0x1b332b),rock=new THREE.Color(0x4e5854),snow=new THREE.Color(0xb8c0b8);
@@ -1216,31 +1256,31 @@ export function createIsland(world) {
   // ---- 日式细节：让岛看起来是有人住的地方 ----
   const poleRoutes=[{from:[-2,4],to:[16,-2],count:7},{from:[2,26],to:[11,36],count:5}];
   const utilityPoles=createUtilityPoles(groundAt,poleRoutes,world.seed);
-  group.add(utilityPoles);
+  group.add(mergeStaticGroup(utilityPoles));
 
   const rooftopAppliances=createRooftopAppliances(groundAt,[
     {x:-14,z:16,width:3,depth:2.6,height:2.4},{x:-6,z:22,width:3,depth:2.6,height:2.6},
     {x:6,z:20,width:3,depth:2.6,height:2.3},{x:15,z:12,width:3,depth:2.6,height:2.5},
     {x:-18,z:6,width:3,depth:2.6,height:2.2},{x:20,z:2,width:3,depth:2.6,height:2.4},
   ],world.seed);
-  group.add(rooftopAppliances);
+  group.add(mergeStaticGroup(rooftopAppliances));
 
   const greenhouses=createGreenhouses(groundAt,[
     {x:24,z:-16,length:11,width:3.4,rows:3},{x:24,z:-24,length:9,width:3.2,rows:2},
     {x:-26,z:22,length:10,width:3.2,rows:2},
   ],world.seed);
-  group.add(greenhouses);
+  group.add(mergeStaticGroup(greenhouses));
 
   const paddies=createRicePaddies(groundAt,[
     {x:-20,z:-18,width:15,depth:11,columns:3,rows:2},
     {x:20,z:30,width:13,depth:9,columns:2,rows:2},
   ]);
-  group.add(paddies);
+  group.add(mergeStaticGroup(paddies));
 
   const shrinePath=[];
   for(let step=0;step<6;step++)shrinePath.push({x:6+step*1.2,z:27+step*1.5});
   const lanterns=createStoneLanterns(groundAt,shrinePath);
-  group.add(lanterns);
+  group.add(mergeStaticGroup(lanterns));
 
   // 商店街：沿路的一排小店，招牌是日文。
   const shopRow=createShopRow(groundAt,[
@@ -1249,17 +1289,17 @@ export function createIsland(world) {
     {x:-1.5,z:43,width:5,depth:4,height:3,angle:-Math.PI/2,awning:2,sign:ISLAND_MARKS.soba},
     {x:-2,z:49,width:5.4,depth:4.2,height:3.2,angle:-Math.PI/2,awning:3,sign:ISLAND_MARKS.shop},
   ]);
-  group.add(shopRow);
+  group.add(mergeStaticGroup(shopRow));
 
   const vendingMachines=createVendingMachines(groundAt,[
     {x:-6.4,z:33.6,angle:-Math.PI/2},
     {x:-5.4,z:44.4,angle:-Math.PI/2},
     {x:-6.2,z:50.6,angle:-Math.PI/2},
   ]);
-  group.add(vendingMachines);
+  group.add(mergeStaticGroup(vendingMachines));
 
   const postBoxes=createPostBoxes(groundAt,[{x:-5.8,z:39.4},{x:-4.6,z:47.2}]);
-  group.add(postBoxes);
+  group.add(mergeStaticGroup(postBoxes));
 
   // 沿海公路的白色护栏。
   const guardrailPath=[];
@@ -1268,7 +1308,7 @@ export function createIsland(world) {
     const point=roadPoints[i];
     guardrailPath.push({x:point.x-center.x-4.1,z:point.z-center.z});
   }
-  if(guardrailPath.length>1)group.add(createGuardrails(groundAt,guardrailPath));
+  if(guardrailPath.length>1)group.add(mergeStaticGroup(createGuardrails(groundAt,guardrailPath)));
 
   // 渔港的港名牌
   const portSign=createSignBoard(signTexture(ISLAND_MARKS.port.lines,ISLAND_MARKS.port.options),{width:5.2,height:2.5,postHeight:1.9});
