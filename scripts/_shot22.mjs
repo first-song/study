@@ -57,5 +57,10 @@ await page.evaluate(() => window.__shot([6, 186], [0, 0], { height: 36, pitch: .
 await wait(12);
 await page.screenshot({ path: path.join(root,'artifacts','v22-island-wide.png') });
 
+// 5. 村里的岛民
+await page.evaluate(() => window.__shot([-26, 62], [8, 26], { height: 6, pitch: -.06 }));
+await wait(10);
+await page.screenshot({ path: path.join(root,'artifacts','v22-townsfolk.png') });
+
 await browser.close();
 console.log('shots ok');

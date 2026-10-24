@@ -487,7 +487,21 @@ expedition-ui.js/expedition.css 显示交互按钮、附着进度、具名反应
 
 
 
-本轮最终验收：`npm.cmd test` 共 98 项全部通过，覆盖海面高度上限、旧浮空存档恢复、非入口岛基阻挡、海底沉船碰撞、沿岸登陆、岛下通道、海床与地标碰撞、混合林布局、鱼群连续转向、人类舰船/沉船、巡逻声呐、船尾尾流、帧插值、底栖生态、五个种子完整实移吞岛旅程和人类宿主寄生终局。`node scripts/smoke.mjs` 共 30 组全部通过，508 秒，实际取得 Pointer Lock，无运行时错误、无失败请求。基准桌面渲染为 257 次绘制调用、264.4 万三角形；调用次数已低于 300 的参考线，三角形数仍高于 75 万的技术美术示例预算。手机横竖屏首次教学、触控交互、器官记录和两条终局均检查。专项命令 `npm.cmd run review:surface` 验证海面高度、31 单位领舰、20 人街景和相机地形净空；`npm.cmd run review:art` 生成压缩视觉截图。关键截图：`artifacts/previews/art-contact-sheet.jpg`、`art-v12-coastal-pines.jpg`、`art-v12-shallow-reef.jpg`、`27-archipelago-scale.png`、`28-naval-patrol-ship.png`、`29-island-crowd.png`、`30-camera-terrain-clearance.png`；最终 `artifacts/smoke-report.json` 为 `ok: true`。
+### V21–V22 最终验收
+
+`npm.cmd test` 共 **152 项**全部通过；`node scripts/smoke.mjs` 共 **30 组**全部通过（桌面 + 手机横竖屏），无运行时错误、无失败请求；`npm run verify:single` 确认单文件 exe 能跑、磁盘上无明文源码；`verify:instincts` / `verify:keys` / `verify:mother` 全部通过。桌面基准 349 次绘制调用、228 万三角形（合并日式细节后 draw call 回到 300 附近）。新截图：`artifacts/v22-volcano.png`、`v22-shop-row.png`、`v22-harbor-flag.png`、`v22-island-wide.png`。
+
+打包产物：`dist/异潮.exe`（91.4MB）与 `dist/异潮-试玩版.zip`（38.5MB，内含 exe + `给朋友.txt`）。
+
+**这一轮踩的坑**：`forEach` 里写 `continue` 直接让整页脚本语法错误；合并静态网格时把"只有一块的批次"也删掉，导致所有日文招牌消失（那块材质独一份，本就不该合并）；Playwright 直接写截图文件在 Windows 上偶发 `UNKNOWN(open)`，改成"取 buffer 自己写 + 重试"；开发服务器没实现 `/quit`，页面关闭的信标被当成 404 错误。
+
+### 引擎决定：留在 Three.js，不换 Unity
+
+理由：①"不好看"的瓶颈是程序化低模资产与动画，不是渲染器，换引擎不会让一个 Box 变好看；②换引擎要作废 13k 行业务代码、全部存档迁移、152 项测试与所有程序化模型，而 Unity 编辑器本身要几个 GB，做完仍是低模；③现有栈已经交付了"稳定的单文件 exe + 可回归的测试"，这正是商业发行最关键的两条。
+
+替代路径（已经可用）：打包里已经带了整个 `three/examples/jsm`，**GLTFLoader 现成可用** —— 用 Blender 做高精度模型、Mixamo 做动作，导出 glTF 直接接进当前引擎，不需要换引擎。若将来真要上 Steam / 主机，迁移点也是资产管线而不是重写引擎。
+
+### 上一轮最终验收：`npm.cmd test` 共 98 项全部通过，覆盖海面高度上限、旧浮空存档恢复、非入口岛基阻挡、海底沉船碰撞、沿岸登陆、岛下通道、海床与地标碰撞、混合林布局、鱼群连续转向、人类舰船/沉船、巡逻声呐、船尾尾流、帧插值、底栖生态、五个种子完整实移吞岛旅程和人类宿主寄生终局。`node scripts/smoke.mjs` 共 30 组全部通过，508 秒，实际取得 Pointer Lock，无运行时错误、无失败请求。基准桌面渲染为 257 次绘制调用、264.4 万三角形；调用次数已低于 300 的参考线，三角形数仍高于 75 万的技术美术示例预算。手机横竖屏首次教学、触控交互、器官记录和两条终局均检查。专项命令 `npm.cmd run review:surface` 验证海面高度、31 单位领舰、20 人街景和相机地形净空；`npm.cmd run review:art` 生成压缩视觉截图。关键截图：`artifacts/previews/art-contact-sheet.jpg`、`art-v12-coastal-pines.jpg`、`art-v12-shallow-reef.jpg`、`27-archipelago-scale.png`、`28-naval-patrol-ship.png`、`29-island-crowd.png`、`30-camera-terrain-clearance.png`；最终 `artifacts/smoke-report.json` 为 `ok: true`。
 
 
 

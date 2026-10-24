@@ -1258,11 +1258,9 @@ export function createIsland(world) {
   const utilityPoles=createUtilityPoles(groundAt,poleRoutes,world.seed);
   group.add(mergeStaticGroup(utilityPoles));
 
-  const rooftopAppliances=createRooftopAppliances(groundAt,[
-    {x:-14,z:16,width:3,depth:2.6,height:2.4},{x:-6,z:22,width:3,depth:2.6,height:2.6},
-    {x:6,z:20,width:3,depth:2.6,height:2.3},{x:15,z:12,width:3,depth:2.6,height:2.5},
-    {x:-18,z:6,width:3,depth:2.6,height:2.2},{x:20,z:2,width:3,depth:2.6,height:2.4},
-  ],world.seed);
+  // 储水罐与空调外机挂在真实存在的房子上。
+  const rooftopAppliances=createRooftopAppliances(groundAt,
+    houseLayout.map(house=>({x:house.x-center.x,z:house.z-center.z,angle:house.angle,width:house.width,height:house.height})));
   group.add(mergeStaticGroup(rooftopAppliances));
 
   const greenhouses=createGreenhouses(groundAt,[

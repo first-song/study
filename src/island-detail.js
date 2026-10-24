@@ -77,40 +77,55 @@ export function createUtilityPoles(groundAt, routes, seed = 1) {
   return group;
 }
 
-// 屋顶上的储水罐与空调外机 —— 一眼就知道是日本的街区。
-export function createRooftopAppliances(groundAt, buildings, seed = 1) {
+// 屋边的储水罐与墙上的空调外机 —— 一眼就知道是日本的街区。
+// 罐子放在屋角的水泥座上，室外机挂在侧墙上：比放在斜屋顶上更贴近现实，
+// 也免得跟屋顶坡度打架。
+export function createRooftopAppliances(groundAt, houses) {
   const group = new THREE.Group();
   group.name = 'japanese-rooftop-appliances';
   const tankMaterial = new THREE.MeshStandardMaterial({ color: 0xd9d2c4, roughness: 0.72, metalness: 0.08 });
   const steelMaterial = new THREE.MeshStandardMaterial({ color: 0x8d9189, roughness: 0.6, metalness: 0.34 });
   const ventMaterial = new THREE.MeshStandardMaterial({ color: 0x6b6f68, roughness: 0.78, metalness: 0.22 });
-  let index = 0;
-  for (const building of buildings) {
-    const { x, z, width = 3, depth = 2.6, height = 2.6 } = building;
+  const padMaterial = new THREE.MeshStandardMaterial({ color: 0x8f8b80, roughness: 0.96 });
+
+  // houses 用的是岛内局部坐标（原点是岛心），groundAt 也按这个坐标系取高度。
+  houses.forEach((house) => {
+    const { x, z, angle = 0, width = 3.2, height = 2.6 } = house;
     const ground = groundAt(x, z);
-    if (ground === null || !Number.isFinite(ground)) continue;
-    const roofY = ground + height;
-    // 储水罐：圆柱 + 支腿
+    if (ground === null || !Number.isFinite(ground)) return;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const toWorld = (lx, lz) => ({ x: x + lx * cos + lz * sin, z: z - lx * sin + lz * cos });
+
+    // 給水タンク：屋角的水泥座 + 圆柱水箱 + 支腿
+    const tankSpot = toWorld(width * 0.92, width * 0.08);
+    const tankGround = groundAt(tankSpot.x, tankSpot.z);
+    if (tankGround === null || !Number.isFinite(tankGround)) return;
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.14, 1.1), padMaterial);
+    pad.position.set(tankSpot.x, tankGround + 0.07, tankSpot.z);
+    group.add(pad);
     const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.95, 12), tankMaterial);
-    tank.position.set(x + (index % 2 ? 0.7 : -0.6), roofY + 0.75, z + 0.3);
+    tank.position.set(tankSpot.x, tankGround + 0.62, tankSpot.z);
     group.add(tank);
     const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.08, 12), steelMaterial);
-    lid.position.set(tank.position.x, roofY + 1.25, tank.position.z);
+    lid.position.set(tankSpot.x, tankGround + 1.12, tankSpot.z);
     group.add(lid);
     for (const offset of [-0.3, 0.3]) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.32, 0.07), steelMaterial);
-      leg.position.set(tank.position.x + offset, roofY + 0.16, tank.position.z);
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.34, 0.07), steelMaterial);
+      leg.position.set(tankSpot.x + offset * cos, tankGround + 0.17, tankSpot.z - offset * sin);
       group.add(leg);
     }
-    // 空调外机
-    const unit = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.52, 0.34), ventMaterial);
-    unit.position.set(x - 0.9, roofY + 0.28, z - 0.5);
+
+    // 室外機：挂在侧墙上
+    const unit = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.52, 0.72), ventMaterial);
+    const unitSpot = toWorld(width * 0.56, width * 0.05);
+    unit.position.set(unitSpot.x, ground + Math.min(1.7, height * 0.6), unitSpot.z);
+    unit.rotation.y = angle;
     group.add(unit);
     const grille = new THREE.Mesh(new THREE.CircleGeometry(0.16, 10), steelMaterial);
-    grille.position.set(unit.position.x, unit.position.y, unit.position.z + 0.18);
+    grille.position.set(unitSpot.x + 0.18 * cos, unit.position.y, unitSpot.z - 0.18 * sin);
+    grille.rotation.y = angle + Math.PI / 2;
     group.add(grille);
-    index++;
-  }
+  });
   return group;
 }
 

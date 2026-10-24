@@ -2,3 +2,16 @@ node_modules/
 test-results/
 playwright-report/
 *.log
+
+# 打包产物：可执行文件、zip、Electron 运行时、SEA 中间文件
+# 这些动辄几百 MB，只在本地生成，不进仓库。
+/dist/
+/build/sea-prep.blob
+/build/payload.gz
+/build/*.exe
+
+# 回归截图与报告：每次跑测试都会重写，属于本地产物。
+/artifacts/
+
+# CPU 剖析输出
+/.prof/
