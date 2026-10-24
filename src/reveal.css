@@ -1,0 +1,102 @@
+/* 本能整合的瞬间：玩家必须清楚知道自己获得了什么、怎么用。
+   这是"你的身体变了"最直接的表达，不能只是一行小字。 */
+
+.instinct-reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 1;
+  transition: opacity .4s ease;
+}
+
+.instinct-reveal.fading {
+  opacity: 0;
+}
+
+.instinct-reveal[hidden] {
+  display: none;
+}
+
+.reveal-card {
+  position: relative;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 22px 28px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(6, 26, 32, .92), rgba(3, 16, 22, .86));
+  border: 1px solid rgba(146, 200, 182, .32);
+  box-shadow: 0 0 60px rgba(120, 220, 190, .18), inset 0 0 40px rgba(120, 220, 190, .07);
+}
+
+/* 动画用类切换来重播：元素在 display:none 状态下不会启动 animation。 */
+.reveal-card.reveal-in {
+  animation: reveal-rise .5s cubic-bezier(.2, .9, .3, 1) forwards;
+}
+
+.reveal-card::before,
+.reveal-card::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160, 230, 205, .5), transparent);
+}
+
+.reveal-card::before {
+  top: 0;
+}
+
+.reveal-card::after {
+  bottom: 0;
+}
+
+.reveal-kicker {
+  display: block;
+  font: 9px var(--mono);
+  letter-spacing: 3px;
+  color: #7fb9a8;
+  margin-bottom: 8px;
+}
+
+.reveal-card h3 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  color: #d8f6e6;
+  text-shadow: 0 0 18px rgba(140, 230, 200, .35);
+}
+
+.reveal-card p {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #9fc0b6;
+}
+
+.reveal-key {
+  display: inline-block;
+  padding: 4px 12px;
+  font: 11px var(--mono);
+  letter-spacing: 2px;
+  color: #0d2a26;
+  background: linear-gradient(180deg, #b9f0d8, #7fd0b4);
+}
+
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+

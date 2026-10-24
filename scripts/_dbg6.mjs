@@ -1,0 +1,13 @@
+import { chromium } from '@playwright/test';
+import fs from 'node:fs';
+const executablePath = ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(c=>fs.existsSync(c));
+const browser = await chromium.launch({ executablePath, headless: true, args:['--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const errs=[];
+page.on('pageerror',e=>errs.push(e.message+'\n'+(e.stack||'').split('\n').slice(0,4).join('\n')));
+page.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text());});
+await page.goto('http://127.0.0.1:4173', { waitUntil: 'load' });
+await page.waitForTimeout(6000);
+console.log('errors:', errs.slice(0,4));
+console.log('banner:', await page.evaluate(()=>document.getElementById('error-banner')?.textContent||''));
+await browser.close();

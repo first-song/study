@@ -1,0 +1,45 @@
+.expedition-enabled .vitals-panel .xp-stat,.expedition-enabled .vitals-panel .biomass-row{display:none}
+.expedition-enabled .mission-panel{max-width:280px}
+.expedition-enabled .mission-panel>p{margin-bottom:10px}
+.expedition-log{border-top:1px solid var(--line);padding:10px 0 12px;color:#92aaa0}
+.expedition-log>div{display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.5px}
+.expedition-log strong{font:11px var(--mono);color:#bdd3af;font-weight:400}
+.expedition-log p{font-size:9px!important;line-height:1.7!important;margin:7px 0 3px!important;color:#a1b5a8!important;letter-spacing:0!important}
+.expedition-log small{font-size:8px;color:#708c83}
+.expedition-context{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);width:min(420px,calc(100vw - 570px));padding:13px 16px;background:linear-gradient(105deg,#071d23e8,#071c22be);border:1px solid #aac5af25;border-left:2px solid #91b3a5;backdrop-filter:blur(8px);color:#aec2b4}
+.expedition-action{display:flex;gap:13px;align-items:center}
+.expedition-description{min-width:0;flex:1}
+.expedition-description>.panel-eyebrow{font-size:8px;letter-spacing:1.2px}
+.expedition-description>strong{font-weight:500;font-size:13px;letter-spacing:.5px;color:#d2dfce;display:block;margin:6px 0}
+.expedition-description>p{font-size:10px;line-height:1.7;margin:0;color:#8da89f}
+.expedition-interact{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#91b5a010;border:1px solid #a8c4ad36;min-width:49px;min-height:56px;padding:7px 8px;color:#c6dabe;cursor:pointer}
+.expedition-interact>kbd{margin:0;font-size:11px;border:0;background:none;line-height:1.4;min-height:0;color:inherit}
+.expedition-interact>span{font-size:9px;color:#a3bba4}
+.expedition-interact:hover:not(:disabled){background:#91b5a029;border-color:#a8c4ad88}
+.expedition-interact:disabled{opacity:.48;cursor:default}
+.expedition-context[data-attached=true] .expedition-interact>kbd{font-size:8px}
+.expedition-progress{margin-top:11px;padding-top:10px;border-top:1px solid #97b59d1c}
+.expedition-progress>div:first-child{display:flex;justify-content:space-between;gap:9px;font-size:9px;line-height:1.5;color:#92ada0}
+.expedition-progress>div>span:last-child{font-family:var(--mono);color:#bdcfac}
+.expedition-progress-track{margin-top:7px;background:#8cac9022;height:3px}
+.expedition-progress-track>span{display:block;background:#abc896;height:100%}
+.reactor-cycle{margin-top:11px;border-top:1px solid #9aaf9c29;padding-top:9px}
+.reactor-cycle-source{display:block;font-size:8px;color:#8ca293;letter-spacing:.5px;margin-bottom:5px}
+.reactor-cycle>div{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#b2c5a0}
+.reactor-cycle>div>span:last-child{font:10px var(--mono)}
+.reactor-cycle p{font-size:9px;color:#91a295;line-height:1.7;margin:5px 0 0}
+.expedition-context[data-phase=warning]{border-left-color:#d3b77e}
+.expedition-context[data-phase=discharge]{border-left-color:#d99980}
+.expedition-context[data-phase=warning] .reactor-cycle>div{color:#dbc38e}
+.expedition-context[data-phase=discharge] .reactor-cycle>div{color:#e6ac91}
+.expedition-context[data-phase=discharge] .reactor-cycle p{color:#c7a395}
+.hud-hidden .expedition-context,.expedition-context[hidden],.expedition-context [hidden]{display:none}
+.abnormal-codex{margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+.abnormal-card{background:linear-gradient(135deg,#22302766,#0b242a)}
+.abnormal-card dl{grid-template-columns:67px 1fr}
+@media(max-width:760px) and (orientation:portrait){.expedition-enabled .mission-panel{bottom:16px}.expedition-enabled .mission-panel .dive-telemetry{display:none}.expedition-enabled .touch-controls{bottom:145px}}
+@media(max-width:1100px){.expedition-context{width:min(350px,calc(100vw - 470px));bottom:140px;padding:11px 13px}.expedition-enabled .mission-panel{max-width:235px}.expedition-description>strong{font-size:12px}.expedition-description>p{font-size:9px}.expedition-action{gap:10px}}
+@media(max-width:760px){.expedition-enabled .mission-panel{max-width:calc(100vw - 205px);min-width:150px}.expedition-log{padding:7px 0 8px}.expedition-log>div{font-size:8px}.expedition-log strong{font-size:9px}.expedition-log p{font-size:7px!important}.expedition-log small{display:none}.expedition-context{width:calc(100vw - 34px);max-width:390px;bottom:220px;padding:10px 12px}.expedition-description>strong{font-size:12px;margin:4px 0}.expedition-description>p{font-size:9px}.expedition-description>.panel-eyebrow{font-size:7px}.expedition-interact{min-height:47px;min-width:43px}.expedition-progress{margin-top:8px;padding-top:7px}.expedition-progress>div:first-child{font-size:8px}.reactor-cycle{margin-top:8px;padding-top:7px}.reactor-cycle>div{font-size:9px}.reactor-cycle p{font-size:8px}.expedition-enabled .dive-telemetry{padding-top:8px}.abnormal-codex{margin-top:20px;padding-top:17px}}
+@media(max-height:650px) and (min-width:761px){.expedition-context{bottom:130px;padding:10px 13px}.expedition-description>p{font-size:9px}.expedition-progress,.reactor-cycle{margin-top:7px;padding-top:7px}.expedition-enabled .mission-panel{max-width:230px}.expedition-log small{display:none}}
+@media(max-height:520px) and (orientation:landscape){.expedition-context{width:min(345px,calc(100vw - 370px));bottom:95px;left:49%;padding:8px 10px}.expedition-action{gap:9px}.expedition-description>.panel-eyebrow{font-size:6px}.expedition-description>strong{font-size:10px;margin:3px 0}.expedition-description>p{font-size:8px;line-height:1.5}.expedition-interact{min-width:38px;min-height:40px;padding:5px}.expedition-interact>kbd{font-size:9px}.expedition-interact>span{font-size:8px}.expedition-progress{margin-top:6px;padding-top:6px}.expedition-progress>div:first-child{font-size:7px}.expedition-progress-track{margin-top:4px;height:2px}.reactor-cycle{margin-top:6px;padding-top:6px}.reactor-cycle>div{font-size:8px}.reactor-cycle>div>span:last-child{font-size:8px}.reactor-cycle p{font-size:7px;margin-top:3px}.expedition-enabled .mission-panel{max-width:190px;min-width:0}.expedition-log{padding:5px 0}.expedition-log>div{font-size:7px}.expedition-log strong{font-size:8px}.expedition-log p{font-size:7px!important;margin:4px 0 0!important}.expedition-log small,.expedition-enabled .mission-panel .dive-telemetry{display:none}.expedition-enabled .mission-panel>p{margin-bottom:6px}}
+.parasite-route-status{font-size:8px!important;line-height:1.55!important;color:#6f928c!important;margin-top:5px!important}.parasite-route-status.unlocked{color:#86e4cd!important;text-shadow:0 0 12px rgba(96,239,205,.25)}

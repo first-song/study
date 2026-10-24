@@ -1,0 +1,85 @@
+/* 海洋之息：玩家行为留下的生态账。
+   它不是分数条，是一面镜子 —— 共生让它变宽，猎杀让它变窄，
+   而海洋会用颜色和鱼群的远近回应你。 */
+
+.ocean-breath {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(146, 185, 166, .12);
+}
+
+.breath-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  color: #7fa39c;
+  margin-bottom: 6px;
+}
+
+.breath-label em {
+  flex: 1;
+  margin-left: 8px;
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: .4px;
+  color: #7fa39c;
+}
+
+.breath-label strong {
+  font: 600 12px var(--mono);
+  color: #9fd8c6;
+  letter-spacing: 0;
+}
+
+.breath-track {
+  position: relative;
+  height: 7px;
+  background: linear-gradient(90deg, rgba(255, 110, 92, .3), rgba(120, 150, 140, .16) 46%, rgba(120, 150, 140, .16) 54%, rgba(96, 214, 186, .3));
+  border: 1px solid rgba(146, 185, 166, .16);
+  overflow: hidden;
+}
+
+.breath-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(255, 128, 96, .85), rgba(255, 190, 120, .9));
+  transition: left .5s ease, width .5s ease, background .5s ease;
+}
+
+.breath-zero {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: 50%;
+  width: 1px;
+  background: rgba(200, 226, 214, .45);
+}
+
+/* 海洋还在喘气 */
+.ocean-breath.thriving .breath-fill {
+  background: linear-gradient(90deg, rgba(120, 226, 190, .9), rgba(190, 245, 205, .95));
+}
+
+.ocean-breath.thriving .breath-label strong,
+.ocean-breath.thriving .breath-label em {
+  color: #a8ecd2;
+}
+
+/* 海洋在死 */
+.ocean-breath.decayed .breath-fill {
+  background: linear-gradient(90deg, rgba(196, 64, 48, .9), rgba(120, 40, 34, .9));
+}
+
+.ocean-breath.decayed .breath-label strong,
+.ocean-breath.decayed .breath-label em {
+  color: #e08a72;
+}
+
+.ocean-breath.decayed .breath-label span {
+  color: #b07264;
+}

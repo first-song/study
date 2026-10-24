@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#071b22" />
+    <meta name="description" content="异潮 ABERRANT TIDE — 从一个深海细胞开始，在受污染的海洋中吞噬、异化、进化。3D 海洋异化生存游戏。" />
+    <title>异潮 · ABERRANT TIDE</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/ecology.css" />
+    <link rel="stylesheet" href="/src/mutations.css" />
+    <link rel="stylesheet" href="/src/living-ocean.css" />
+    <link rel="stylesheet" href="/src/expedition.css" />
+  <link rel="stylesheet" href="/src/hunt.css" />
+    <link rel="stylesheet" href="/src/instinct.css" />
+    <link rel="stylesheet" href="/src/breath.css" />
+    <link rel="stylesheet" href="/src/badges.css" />
+    <link rel="stylesheet" href="/src/reveal.css" />
+    <link rel="stylesheet" href="/src/abyss.css" />
+    <link rel="stylesheet" href="/src/onboarding.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23091f26'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%23d3ff87' stroke-width='2'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23d3ff87'/%3E%3C/svg%3E" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/node_modules/three/build/three.module.js",
+          "three/addons/": "/node_modules/three/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <script>
+      // 桌面单文件版：页面被关掉时通知服务器退出，别在后台留一个进程。
+      window.addEventListener('beforeunload', () => {
+        try { navigator.sendBeacon('/quit'); } catch {}
+      });
+    </script>
+    <div id="scene-container" aria-label="三维海洋世界"></div>
+    <div class="screen-texture" aria-hidden="true"></div>
+
+    <main id="menu-screen" class="menu-screen">
+      <header class="menu-header">
+        <a class="wordmark" href="#" aria-label="异潮首页">
+          <svg class="brand-symbol" width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11" stroke="currentColor"/><circle cx="14" cy="14" r="5" fill="currentColor"/><path d="M14 0v5m14 9h-5M14 28v-5M0 14h5" stroke="currentColor"/></svg>
+          <span>ABERRANT TIDE<span class="wordmark-sub">独立生命演化档案</span></span>
+        </a>
+        <div class="header-right"><span class="status-light"></span>海洋信号已接入<span class="edition">ABERRANT ECOLOGY / 05</span></div>
+      </header>
+
+      <section class="menu-content">
+        <div class="eyebrow"><span class="tiny-line"></span>深海异化生存 / 3D</div>
+        <h1>异<span class="title-second">潮</span><span class="title-point">.</span></h1>
+        <div class="english-title">ABERRANT TIDE</div>
+        <div class="intro-rule"><span>生命，不再遵循旧的规则。</span></div>
+        <p class="menu-description">灰屿的污染沉入海底。<br />一枚微不足道的细胞，在辐射中苏醒。<br />附着、搭乘、侵入，在异常生态中生存。</p>
+        <div class="menu-actions">
+          <button id="start-btn" class="primary-button"><span>从一个细胞开始</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5"/></svg></button>
+          <button id="continue-btn" class="secondary-button" hidden>继续上次演化 <span>↗</span></button>
+          <button id="help-btn" class="text-button">生存指南 <span class="small-circle">?</span></button>
+          <button class="text-button" data-open-biology>生命与海洋 <span>↗</span></button>
+        </div>
+        <div class="menu-details"><span><i class="detail-dot"></i>污染与变异生态</span><span><i class="detail-dot"></i>随机生命演化</span><span><i class="detail-dot"></i>周期性反应堆侵入</span></div>
+      </section>
+
+      <aside class="specimen-annotation" aria-hidden="true">
+        <div class="specimen-index">SPECIMEN <b>001</b></div>
+        <div class="annotation-arm"></div>
+        <div class="specimen-label">原始异变体<span>PROTOCELL · GENESIS</span></div>
+        <div class="specimen-coordinates">22° 31′ N &nbsp; 143° 42′ E</div>
+      </aside>
+      <div class="specimen-bottom" aria-hidden="true"><div class="small-cross">+</div><span>未知生命体<br /><b>正在等待第一次进化</b></span><div class="specimen-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+      <footer class="menu-footer">
+        <span class="footer-lore"><span class="footer-coordinate">LOG_0001</span> 从微末中诞生，于异变中重生。</span>
+        <label class="quality-setting" for="quality-select"><span>画质</span><select id="quality-select" aria-label="渲染画质"><option value="low">流畅</option><option value="medium" selected>标准</option><option value="high">精细</option></select></label>
+        <span class="fiction-note">虚构世界 · 探索生命的另一种可能</span>
+      </footer>
+    </main>
+
+    <div id="hud" class="hud" hidden>
+      <header class="hud-header">
+        <div class="hud-wordmark"><svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11" stroke="currentColor"/><circle cx="14" cy="14" r="5" fill="currentColor"/><path d="M14 0v5m14 9h-5M14 28v-5M0 14h5" stroke="currentColor"/></svg><span>异潮<small>ABERRANT TIDE</small></span></div>
+        <div class="stage-heading"><div id="stage-name">初生海域</div><span id="stage-subtitle">第一阶段 · 生命的微光</span><span id="zone-name" class="zone-name">透光层</span></div>
+        <div class="hud-utility"><button id="camera-btn" class="utility-button" title="切换第一 / 第三人称视角"><span>第三人称</span><kbd>V</kbd></button><button id="sound-btn" class="icon-button" title="开关声音" aria-label="开关声音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Zm4 4c2 2 2 4 0 6m3-9c4 3 4 9 0 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="pause-btn" class="icon-button" title="暂停游戏" aria-label="暂停游戏"><svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="M5 3v12M11 3v12" stroke="currentColor" stroke-width="2"/></svg></button></div>
+      </header>
+
+      <section class="vitals-panel" aria-label="生命体状态">
+        <div class="vitals-heading"><div class="level-badge"><small>LV.</small><span id="level-value">01</span></div><div class="form-label"><span class="panel-eyebrow">当前生命形态</span><h2 id="form-name">原始细胞</h2></div><div class="living-indicator"><span></span>存活</div></div>
+        <div class="stat"><div class="stat-label"><span><i class="stat-dot hp-dot"></i>生命</span><span id="hp-value">100 / 100</span></div><div class="stat-track"><div id="hp-fill" class="stat-fill hp-fill"></div></div></div>
+        <div class="stat"><div class="stat-label"><span><i class="stat-dot energy-dot"></i>能量</span><span id="energy-value">100 / 100</span></div><div class="stat-track"><div id="energy-fill" class="stat-fill energy-fill"></div></div></div>
+        <div class="vital-badges"><span class="vital-badge" title="营养储备：见底会掉速"><i class="stat-dot nutrition-dot"></i>营养 <b id="nutrition-value">85%</b></span><span class="vital-badge" title="生物质：猎杀与吞噬积累"><i class="stat-dot biomass-dot"></i>生物质 <b id="biomass-value">0</b></span></div>
+        <div class="stat"><div class="stat-label"><span><i class="stat-dot radiation-dot"></i>辐射负荷</span><span id="radiation-value">0 / 100</span></div><div class="stat-track"><div id="radiation-fill" class="stat-fill radiation-fill" style="width:0%"></div></div><p id="radiation-status" class="radiation-status">耐受阈值 62%</p></div>
+
+        <div class="ocean-breath" id="ocean-breath" title="你的行为留下的生态账：共生让它变宽，猎杀让它变窄">
+          <div class="breath-label"><span>海洋之息</span><em id="breath-state">中立</em><strong id="breath-value">0</strong></div>
+          <div class="breath-track"><div id="breath-fill" class="breath-fill"></div><span class="breath-zero"></span></div>
+        </div>
+
+        <div class="branch-tracker"><div><span class="branch-marker devour-marker"></span><span>吞噬</span><strong id="branch-devour">0</strong></div><div><span class="branch-marker radiation-marker"></span><span>辐射</span><strong id="branch-radiation">0</strong></div><div><span class="branch-marker symbiosis-marker"></span><span>共生</span><strong id="branch-symbiosis">0</strong></div></div>
+        <div class="physiology-summary"><span>身体结构</span><strong id="body-plan-name">单细胞生命</strong><small id="physiology-state">细胞膜交换 · 鞭毛推进</small></div>
+      </section>
+
+      <section id="boss-panel" class="boss-panel" hidden aria-label="排放母体状态"><div class="boss-heading"><span class="danger-indicator"></span><span>灰屿 · 排放母体</span><span id="boss-hp-value">100%</span></div><div class="boss-track"><div id="boss-hp-fill"></div></div><div class="boss-subtitle" id="boss-phase">外甲 · 撕断三条触须</div></section>
+
+      <aside class="radar-panel"><div class="radar-heading"><span>周边感知</span><span>SONAR</span></div><canvas id="radar" width="130" height="130" aria-label="周边生物、污染源和人类巡逻船的位置"></canvas><div class="radar-legend"><span><i></i>养分</span><span>□ 污染源</span><span><i></i>核心</span><span>△ 巡逻船</span></div><button id="mutation-btn" class="mutation-access"><span>异变记录</span><strong id="mutation-energy">0 / 32</strong><small id="mutation-status">自动随机响应</small><kbd>M</kbd></button></aside>
+      <aside class="observation-panel"><div class="panel-eyebrow">生态观察 <span id="observation-count">0 / 12</span></div><h3 id="observation-name">感知海洋中的生命</h3><span id="observation-role">靠近大型生物以了解它们</span><p id="observation-detail">鱼群、灯笼鱼、皇带鱼、头足类、底栖生命与潜游巨兽共享海洋。</p><button class="observation-link" data-open-biology>打开生命图鉴 <kbd>B</kbd></button></aside>
+
+      <div id="crosshair" class="crosshair" aria-hidden="true"><span></span></div>
+      <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
+      <div id="instinct-reveal" class="instinct-reveal" hidden aria-hidden="true">
+        <div class="reveal-card">
+          <span class="reveal-kicker">本能整合 · INSTINCT</span>
+          <h3 id="reveal-name">撕咬</h3>
+          <p id="reveal-detail"></p>
+          <span class="reveal-key" id="reveal-key">鼠标左键</span>
+        </div>
+      </div>
+
+      <section class="mission-panel"><div class="panel-eyebrow"><span class="mission-symbol">◇</span>当前目标</div><p id="objective-text">寻找附近的菌膜，靠近后按 G 附着。</p><div class="dive-telemetry"><div><span>深度</span><strong id="depth-value">18</strong><small>m</small></div><div><span>存活</span><strong id="time-value">00:00</strong></div><span class="telemetry-line"></span></div></section>
+
+      <nav id="abilities" class="abilities" aria-label="异化能力">
+        <button class="ability-button" data-ability="dash" title="空格：冲刺"><div class="ability-icon"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="m16 3-9 13h7l-2 9 10-14h-8l2-8Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span id="dash-cooldown" class="ability-cooldown"></span></div><span class="ability-name">疾游</span><kbd>SPACE</kbd></button>
+        <button class="ability-button" data-ability="pulse" title="Q：辐射脉冲"><div class="ability-icon"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M7.6 7.6a9 9 0 0 0 0 12.8m12.8-12.8a9 9 0 0 1 0 12.8M4 4a14 14 0 0 0 0 20M24 4a14 14 0 0 1 0 20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span id="pulse-cooldown" class="ability-cooldown"></span></div><span class="ability-name">辐射脉冲</span><kbd>Q</kbd></button>
+        <button class="ability-button" data-ability="feed" title="E：牵引有机碎屑，补充营养"><div class="ability-icon"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M5 18c1 5 5 7 9 7s8-2 9-7M8 16c1 3 3 5 6 5s5-2 6-5M14 3v12m-4-4 4 4 4-4M5 8l3 4m15-4-3 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="5" cy="4" r="1" fill="currentColor"/><circle cx="23" cy="4" r="1" fill="currentColor"/></svg><span id="feed-cooldown" class="ability-cooldown"></span></div><span class="ability-name">营养摄取</span><kbd>E</kbd></button>
+      </nav>
+
+      <aside class="controls-hint"><div><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 游动</span><span id="mouse-look-status">移动鼠标环视 · 点击海面锁定</span></div><div><span><kbd>R</kbd> 上浮 <kbd>F</kbd> 下潜</span><span><kbd>V</kbd> 切换视角 <kbd>ESC</kbd> 暂停</span></div><p><span class="status-light"></span>左键 撕咬 · Z 突进 · C 拟态 · X 扫描</p><p><span class="status-light"></span>G 附着 / 脱离 · SPACE 紧急脱离 · H 隐藏界面</p></aside>
+
+      <div id="touch-controls" class="touch-controls" aria-label="触屏移动控制"><div class="touch-directions"><button data-move="forward" class="touch-forward" aria-label="前进">↑</button><button data-move="left" class="touch-left" aria-label="左移">←</button><button data-move="back" class="touch-back" aria-label="后退">↓</button><button data-move="right" class="touch-right" aria-label="右移">→</button></div><div class="touch-depth"><button data-move="up" aria-label="上浮">上浮</button><button data-move="down" aria-label="下潜">下潜</button></div></div>
+    </div>
+
+
+    <section id="pause-screen" class="modal-screen" hidden aria-labelledby="pause-title"><div class="modal-dialog pause-dialog"><div class="modal-eyebrow">LIFE ON HOLD</div><h2 id="pause-title">潮汐暂歇<span>.</span></h2><p class="modal-description">深海会等待你的归来。</p><div class="pause-actions"><button id="resume-btn" class="primary-button"><span>继续探索</span><span>↗</span></button><button id="tutorial-btn" class="secondary-button">新手课程与双终局 <span>?</span></button><button id="save-btn" class="secondary-button">保存当前进度 <span>↓</span></button><button id="restart-btn" class="secondary-button">重新开始 <span>↻</span></button><button id="menu-btn" class="text-button">返回主菜单</button></div><div class="camera-settings"><label for="mouse-sensitivity">鼠标灵敏度 <output id="sensitivity-value">1.0×</output></label><input id="mouse-sensitivity" type="range" min="0.3" max="2" step="0.1" value="1" /><label class="setting-check"><input id="invert-y" type="checkbox" /> 反转垂直视角</label><label class="setting-check"><input id="reduced-motion" type="checkbox" /> 减少镜头动态</label></div><span class="modal-bottom-note">ESC / P 继续 · 点击海面锁定鼠标</span></div></section>
+
+    <section id="end-screen" class="modal-screen" hidden aria-labelledby="end-title"><div class="modal-dialog end-dialog"><div id="end-eyebrow" class="modal-eyebrow">EVOLUTION COMPLETE</div><h2 id="end-title">深海记住了你。</h2><p id="end-description" class="modal-description">从一枚细胞开始，你改写了这片海洋的命运。</p><div id="end-stats" class="end-stats"></div><div class="end-actions"><button id="retry-btn" class="primary-button"><span>开始新的生命</span><span>↗</span></button><button id="end-menu-btn" class="text-button">返回主菜单</button></div></div></section>
+
+    <section id="biology-screen" class="modal-screen biology-screen" hidden aria-labelledby="biology-title"><div class="biology-dialog"><header class="biology-header"><div><div class="modal-eyebrow">LIVING OCEAN / FIELD NOTES</div><h2 id="biology-title">生命的<span>另一种可能</span></h2></div><button id="biology-close-btn" class="close-button" aria-label="关闭生命图鉴">×</button></header><nav class="biology-tabs" aria-label="生命图鉴分类"><button data-codex-tab="forms" class="active" aria-pressed="true">身体如何改变</button><button data-codex-tab="species" aria-pressed="false">海洋中的邻居</button><button data-codex-tab="ocean" aria-pressed="false">深度与食物网</button></nav><div id="biology-content" class="biology-content"></div><footer class="biology-footer"><span>阅读时世界暂停 · 按 B 或 ESC 返回</span><span>辐射异化与跨尺度成长为虚构设定</span></footer></div></section>
+
+    <section id="help-screen" class="modal-screen" hidden aria-labelledby="help-title">
+      <div class="modal-dialog help-dialog">
+        <button id="help-close-btn" class="close-button" aria-label="关闭生存指南">×</button>
+        <div class="modal-eyebrow">FIELD GUIDE / 001</div>
+        <h2 id="help-title">深海生存指南<span>.</span></h2>
+        <p class="modal-description">你很渺小，但不必一直如此。</p>
+        <div class="help-grid">
+          <div>
+            <h3><span>01</span>探索海洋</h3>
+            <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 游动，<kbd>R</kbd> 上浮，<kbd>F</kbd> 下潜。开阔海域只能接近水线；贴近浅岸坡后才可登陆。<br />移动鼠标即可环视；<kbd>V</kbd> 切换视角，<kbd>J</kbd> 打开海图。海面巡逻舰先亮黄灯预警；声呐冲击前下潜，进入舰尾尾流则会获得推进。</p>
+          </div>
+          <div>
+            <h3><span>02</span>营养与辐射</h3>
+            <p>浅色有机碎屑、海洋雪和菌膜补充营养，<kbd>E</kbd> 牵引附近碎屑，也能连续滤食移动中的活性营养羽流。青绿色外壳较安全；橙色核心提高异变能，同时增加辐射和捕食压力，失稳爆裂前要撤离。同位素与反应堆排放同样提高辐射负荷；每 32 异变能自动触发一次随机器官响应。</p>
+          </div>
+          <div>
+            <h3><span>03</span>让身体经历海洋</h3>
+            <p>靠近菌膜、鱼群、鲸、海龟或人类潜水员按 <kbd>G</kbd> 附着；首次经历推动随机发育，普通食物不直接升级。海床、礁台、反应堆、舰船与大型生物都有实体碰撞；岛下核心须沿深处断层通道接近。</p>
+          </div>
+          <div>
+            <h3><span>04</span>随机抵达的本能</h3>
+            <p>器官随机长出，对应的操作也随机解锁：<kbd>撕咬</kbd>（左键，朝前重创单体并打断蓄力）、<kbd>喷射突进</kbd>（<kbd>Z</kbd>，撞开沿途生物）、<kbd>辐射脉冲</kbd>（<kbd>Q</kbd>，定向扇形并击退致晕）、按住 <kbd>C</kbd> <b>拟态</b>（收敛发光，捕食者锁定不到你）、按住 <kbd>X</kbd> <b>感电扫描</kbd>（看见周围生命的轮廓）。冲刺撞到生物会造成撞击伤害与眩晕。技能不可指定，但你可以决定去猎什么。</p>
+          </div>
+          <div>
+            <h3><span>05</span>追猎异变回声</h3>
+            <p>每座活跃反应堆都由一只异变回声体供给共振，<b>每只都有一把钥匙</b>：折脊回声体会闪开辐射脉冲，只能贴近撕咬；诱光群落的假光会骗过撕咬，要用脉冲打散；压力蠕冠藏在暗处，要按住 <kbd>X</kbd> 扫描出真身，或按住 <kbd>C</kbd> 拟态引它过来。观察它从追踪进入蓄力，再从蓄力进入开壳；蓄力时按 <kbd>SPACE</kbd> 规避，开壳时切断连接。连接降到三成后按 <kbd>E</kbd> 可吞下弱点。开壳命中越多、追猎越快，1–3 级的异化收益越高。</p>
+          </div>
+          <div>
+            <h3><span>06</span>排放母体</h3>
+            <p>三座反应堆停机后，灰屿的排放母体现身：外甲上的三条触须<b>打不动</b> —— 辐射脉冲会被弹开，要用<b>撕咬</b>一条条切下来；再在喷发阶段用<b>脉冲</b>打散污染云（或按住 <kbd>C</kbd> 拟态硬扛）；最后趁核心张开的窗口撕咬它，或用冲刺撞击。母体死亡后灰屿的排放结构才暴露。</p>
+          </div>
+          <div>
+            <h3><span>07</span>三种收束</h3>
+            <p>巨兽路线：停堆、击败母体，成为 Lv.11 巨兽后靠近按 <kbd>E</kbd> 吞岛。寄生路线只对拥有寄生原基的个体开放：完成人类潜水员的神经寄生适应后，再接管港口泵站、海面实验舱与通信继电器。而最终收束由左上角的<b>海洋之息</b>决定：它记着你的猎杀与共生，走共生路线会变宽，走捕食路线会变窄，海水也会跟着变浑。<kbd>M</kbd> 查看异变记录，<kbd>B</kbd> 查看图鉴。</p>
+          </div>
+        </div>
+        <div class="help-footer"><span class="status-light"></span>光合共生只在透光层补给；深处可寻找海洋雪。触屏使用方向键，滑动环视。</div>
+      </div>
+    </section>
+
+    <section id="mutation-screen" class="modal-screen mutation-screen" hidden role="dialog" aria-modal="true" aria-labelledby="mutation-title"><div class="mutation-dialog"><header class="mutation-header"><div><div class="modal-eyebrow">LIFE / AN UNWRITTEN HISTORY</div><h2 id="mutation-title">生命的<span>随机回声</span></h2></div><button id="mutation-close-btn" class="close-button" aria-label="关闭异变记录">×</button></header><div class="mutation-economy"><div class="mutation-wallet"><span>下次响应进度</span><strong id="mutation-balance">0 / 32</strong></div><p id="mutation-rule">达到阈值后自动响应，身体的改变由系统概率决定。</p></div><div class="mutation-scroll"><div class="mutation-section-title"><span>已发生的变化</span><small>最近 12 次辐射响应</small></div><div id="mutation-history" class="mutation-history"></div><div class="mutation-section-title"><span>身体特征</span><small>只读观察 · 无法指定路线</small></div><div id="mutation-content" class="mutation-content"></div></div><footer class="mutation-footer"><span id="mutation-installed">0 次辐射响应</span><span>进化自动发生 · 阅读记录时世界暂停</span><span>M / ESC 返回海洋</span></footer></div></section>
+
+    <div id="loading-label" class="loading-label"><span class="loading-spinner"></span>正在唤醒深海<span class="loading-dots">...</span></div>
+    <div id="error-banner" class="error-banner" role="alert" hidden></div>
+    <div id="finale-caption" class="finale-caption" aria-hidden="true">灰屿正在沉入巨兽腹中</div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+
+
+

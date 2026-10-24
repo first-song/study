@@ -1,0 +1,10 @@
+{
+  "main": "E:/单细胞游戏/build/launcher.cjs",
+  "output": "E:/单细胞游戏/build/sea-prep.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": false,
+  "useCodeCache": false,
+  "assets": {
+    "payload.gz": "E:/单细胞游戏/build/payload.gz"
+  }
+}

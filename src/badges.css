@@ -1,0 +1,65 @@
+/* 状态面板的紧凑徽章：把营养与生物质从两整行压成两枚小标签，
+   让左上角少占一点画面 —— 玩家要看到的是海，不是表格。 */
+
+.vital-badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.vital-badge {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 7px;
+  font-size: 9px;
+  letter-spacing: .6px;
+  color: #8fa9a3;
+  background: rgba(10, 32, 38, .38);
+  border: 1px solid rgba(146, 185, 166, .12);
+  white-space: nowrap;
+}
+
+.vital-badge b {
+  margin-left: auto;
+  font: 600 11px var(--mono);
+  color: #c3d8ce;
+  letter-spacing: 0;
+}
+
+.vital-badge .stat-dot {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+}
+
+.stat-dot.biomass-dot {
+  background: #c8a86a;
+  box-shadow: 0 0 6px rgba(200, 168, 106, .5);
+}
+
+@media (max-width: 900px) {
+  .vital-badges {
+    gap: 5px;
+  }
+
+  .vital-badge {
+    padding: 4px 5px;
+    font-size: 8px;
+    gap: 4px;
+  }
+
+  .vital-badge b {
+    font-size: 10px;
+  }
+}
+
+.vital-badge.low {
+  border-color: rgba(226, 128, 96, .45);
+  color: #e0a08c;
+}
+
+.vital-badge.low b {
+  color: #f0a88c;
+}

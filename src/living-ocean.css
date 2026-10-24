@@ -1,0 +1,23 @@
+/* The journal is observational: it never presents purchasable traits. */
+.mutation-scroll{min-height:0;overflow:auto;padding-top:20px;scrollbar-width:thin;scrollbar-color:#527c6f #102b2e}
+.mutation-content{overflow:visible;padding-top:13px;padding-bottom:24px}
+.mutation-section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;color:#c1d2c6;font-size:13px;padding:0 2px 12px;letter-spacing:1px}
+.mutation-section-title small{font-size:10px;letter-spacing:0;color:#7d9b94}
+.mutation-history{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:23px}
+.history-empty{grid-column:1/-1;color:#8ca9a1;font-size:12px;line-height:1.8;padding:12px;margin:0;background:#8aa5940a}
+.mutation-history-entry{padding:11px 12px;background:#91b3a210;border-left:2px solid #607c74;display:flex;flex-direction:column;gap:6px;font-size:11px;line-height:1.6}
+.mutation-history-entry>span{font:10px var(--mono);color:#7a9690}.mutation-history-entry>strong{font-size:11px;font-weight:400;color:#9eb9aa}
+.mutation-history-entry.outcome-mutation{border-left-color:#b0d8bc}.mutation-history-entry.outcome-mutation>strong{color:#c2e1c8}
+.mutation-probability{font-size:10px;line-height:1.8;color:#8ba79a;border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+.mutation-summary,.mutation-effect{font-size:12px;line-height:1.8}.mutation-next{font-size:11px}.mutation-economy p{font-size:11px}.mutation-footer{font-size:9px}.mutation-card-top{font-size:11px}
+.mutation-wallet{flex-direction:column;align-items:flex-start;gap:7px}.mutation-wallet strong{font-size:25px}.mutation-wallet span{font-size:11px}
+.mutation-access{grid-template-columns:1fr auto}.mutation-access strong{font-size:12px}.mutation-access small{grid-column:1/-1;font-size:8px}.mutation-access kbd{display:none}
+.camera-settings{margin-top:20px;padding-top:17px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+.camera-settings>label:first-child{grid-column:1/-1;display:flex;justify-content:space-between;font-size:11px;color:#a4c0b4}.camera-settings input[type=range]{grid-column:1/-1;accent-color:#b0d1ad;width:100%;margin:0;cursor:pointer}
+.setting-check{display:flex;gap:7px;align-items:center;font-size:10px;color:#8fa99e;white-space:nowrap}.setting-check input{accent-color:#b0d1ad;margin:0}.pause-dialog{max-height:92dvh;overflow:auto}.camera-settings output{font-family:var(--mono)}
+.mouse-locked #scene-container{cursor:none}.controls-hint{max-width:330px}.controls-hint>div:first-child{flex-wrap:wrap;gap:10px}.controls-hint #mouse-look-status{font-size:9px;color:#9fbcae}
+.hud-hidden .vitals-panel,.hud-hidden .radar-panel,.hud-hidden .observation-panel,.hud-hidden .mission-panel,.hud-hidden .abilities,.hud-hidden .controls-hint{display:none}
+.observation-panel{background:linear-gradient(115deg,#05191f8c,#061c2215)}
+@media(max-height:520px) and (orientation:landscape){.vitals-panel .biomass-row,.vitals-panel .branch-tracker,.vitals-panel .physiology-summary{display:none}.vitals-panel .xp-stat{margin-top:10px}}
+@media(max-width:760px){.mutation-history{grid-template-columns:1fr 1fr}.mutation-section-title{font-size:12px}.mutation-section-title small{font-size:9px}.mutation-history-entry{padding:9px}.mutation-history-entry>strong{font-size:10px}.mutation-summary,.mutation-effect{font-size:11px}.mutation-next{font-size:10px}.mutation-economy p{font-size:10px}.mutation-wallet{flex-direction:row;align-items:center;gap:12px}.mutation-access strong{font-size:9px}.mutation-access small{font-size:6px}.mutation-footer{font-size:8px}.mutation-section-title{align-items:flex-start}.mutation-scroll{padding-top:14px}}
+@media(max-height:520px) and (orientation:landscape){.mutation-history{grid-template-columns:repeat(3,minmax(0,1fr))}.mutation-scroll{padding-top:12px}.mutation-economy p{font-size:9px}.mutation-summary,.mutation-effect{font-size:11px}.camera-settings{margin-top:14px;padding-top:12px;gap:9px}.mutation-wallet{min-width:105px}.mutation-access small{font-size:7px}.mutation-footer{font-size:8px}.pause-dialog{max-height:94dvh}}

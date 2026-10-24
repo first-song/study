@@ -1,0 +1,262 @@
+/* 本能技能条：与原有技能条并排，组成一条完整的操作栏。
+   未整合的槽位保留为暗色剪影 —— 玩家看得出"还有东西要来"，但指定不了。 */
+
+.instinct-bar {
+  display: contents;
+}
+
+.instinct-button {
+  width: 74px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(14, 41, 45, .55), rgba(3, 20, 27, .8));
+  border: 1px solid rgba(146, 185, 166, .2);
+  border-left-width: 2px;
+  border-left-color: rgba(146, 185, 166, .08);
+  color: #c6dbb8;
+  transition: background .2s, color .2s, border-color .2s, transform .2s, opacity .2s;
+}
+
+.instinct-button:first-child {
+  margin-left: 10px;
+  border-left-width: 1px;
+}
+
+.instinct-sigil {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 33px;
+  height: 34px;
+  color: var(--instinct-color, #c6dbb8);
+}
+
+.instinct-sigil svg {
+  width: 25px;
+  height: 25px;
+}
+
+.instinct-name {
+  font-size: 9px;
+  color: #a9c1b5;
+  letter-spacing: .7px;
+  white-space: nowrap;
+}
+
+.instinct-button kbd {
+  font-size: 8px;
+  line-height: 11px;
+  min-height: 14px;
+  color: #759a94;
+  margin: 0;
+}
+
+.instinct-rank {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  font: 9px var(--mono);
+  color: var(--instinct-color, #c6dbb8);
+  opacity: .8;
+}
+
+.instinct-cooldown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 20px var(--mono);
+  color: var(--acid);
+  text-shadow: 0 0 6px #051d25;
+  pointer-events: none;
+}
+
+/* 未整合：只剩一团剪影 */
+.instinct-button.locked {
+  opacity: .34;
+  filter: grayscale(1);
+  border-left-color: transparent;
+}
+
+.instinct-button.locked .instinct-name {
+  color: #6c8884;
+}
+
+.instinct-button.owned {
+  border-left-color: var(--instinct-color, rgba(146, 185, 166, .3));
+}
+
+.instinct-button.owned:hover {
+  background: linear-gradient(180deg, rgba(22, 58, 60, .7), rgba(5, 26, 32, .85));
+}
+
+.instinct-button.unaffordable {
+  opacity: .58;
+}
+
+.instinct-button.cooling .instinct-sigil {
+  opacity: .45;
+}
+
+.instinct-button.active {
+  border-color: var(--instinct-color, #b9ef98);
+  box-shadow: inset 0 0 18px rgba(138, 215, 255, .22);
+}
+
+.instinct-button.active .instinct-name {
+  color: var(--instinct-color, #dff0e6);
+}
+
+/* 解锁瞬间：一次短促的高亮，让"我变强了"被看见 */
+.instinct-button.just-unlocked {
+  animation: instinct-unlock 1.3s ease-out;
+}
+
+@keyframes instinct-unlock {
+  0% {
+    box-shadow: 0 0 0 0 var(--instinct-color, #b9ef98);
+    background: linear-gradient(180deg, rgba(120, 220, 190, .85), rgba(30, 90, 90, .9));
+  }
+  22% {
+    box-shadow: 0 0 26px 6px var(--instinct-color, #b9ef98);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (max-width: 1180px) {
+  .instinct-button {
+    width: 67px;
+    min-height: 87px;
+    gap: 4px;
+  }
+
+  .instinct-sigil {
+    height: 28px;
+    width: 28px;
+  }
+
+  .instinct-sigil svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .instinct-name {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .instinct-button {
+    width: 53px;
+    min-height: 67px;
+    gap: 3px;
+  }
+
+  .instinct-sigil {
+    height: 24px;
+    width: 24px;
+  }
+
+  .instinct-sigil svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .instinct-name {
+    font-size: 7px;
+  }
+
+  .instinct-button kbd {
+    font-size: 7px;
+    min-height: 12px;
+  }
+}
+
+/* 窄屏：七个技能按钮必须还能挤进手机宽度。
+   名字缩到最小，图标与键位保留 —— 玩家认的是形状和键位，不是标签。 */
+@media (max-width: 760px) {
+  /* 原有技能条一起缩小，否则七个按钮会把手机屏幕撑破。 */
+  .ability-button {
+    width: 44px;
+    min-height: 58px;
+    gap: 2px;
+  }
+
+  .ability-icon {
+    height: 22px;
+    width: 22px;
+  }
+
+  .ability-icon svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .ability-name {
+    font-size: 6px;
+    letter-spacing: 0;
+  }
+
+  .ability-button kbd {
+    font-size: 6px;
+    min-height: 10px;
+    padding: 0 2px;
+  }
+
+  .instinct-button {
+    width: 44px;
+    min-height: 58px;
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .instinct-sigil {
+    height: 22px;
+    width: 22px;
+  }
+
+  .instinct-sigil svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .instinct-name {
+    font-size: 6px;
+    letter-spacing: 0;
+    transform: scale(.92);
+  }
+
+  .instinct-button kbd {
+    font-size: 6px;
+    min-height: 10px;
+    padding: 0 2px;
+  }
+
+  .instinct-rank {
+    font-size: 7px;
+    top: 2px;
+    right: 3px;
+  }
+}
+
+/* 横屏手机：技能条贴着底边，避开触控方向键 */
+@media (max-height: 520px) and (orientation: landscape) {
+  .instinct-button {
+    width: 46px;
+    min-height: 52px;
+  }
+
+  .instinct-name {
+    font-size: 6px;
+  }
+}

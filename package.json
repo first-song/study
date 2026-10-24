@@ -1,0 +1,41 @@
+{
+  "name": "aberrant-tide",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "异潮 — 3D 海洋异化生存游戏",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "review:surface": "node scripts/review-v10.mjs",
+    "review:art": "node scripts/review-art-v12.mjs",
+    "review:ecology": "node scripts/review-ecology-v13.mjs",
+    "review:v14": "node scripts/review-v14.mjs",
+    "review:v15": "node scripts/review-v15.mjs",
+    "review:v16": "node scripts/review-v16.mjs",
+    "profile:v16": "node scripts/profile-v16.mjs",
+    "review:v17": "node scripts/review-v17.mjs",
+    "review:mobile-camera": "node scripts/review-mobile-camera.mjs",
+    "context:previews": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/context/New-Previews.ps1",
+    "verify:instincts": "node scripts/verify-instincts.mjs",
+    "verify:mother": "node scripts/verify-mother.mjs",
+    "bench:step": "node scripts/bench-step.mjs",
+    "verify:keys": "node scripts/verify-keys.mjs",
+    "desktop": "electron .",
+    "pack:win": "node scripts/build-desktop.mjs",
+    "verify:desktop": "node scripts/verify-desktop.mjs",
+    "pack:zip": "node scripts/make-single-exe.mjs && powershell -NoProfile -Command \"Compress-Archive -Path 'dist\\异潮.exe','build\\给朋友.txt' -DestinationPath 'dist\\异潮-试玩版.zip' -CompressionLevel Optimal -Force\"",
+    "pack:single": "node scripts/make-single-exe.mjs",
+    "verify:single": "node scripts/verify-single-exe.mjs"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "@electron/packager": "^20.3.0",
+    "@playwright/test": "1.56.1",
+    "electron": "^45.0.0",
+    "postject": "^1.0.0-alpha.6"
+  },
+  "main": "electron/main.cjs"
+}
