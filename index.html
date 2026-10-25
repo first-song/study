@@ -80,7 +80,7 @@
     <div id="hud" class="hud" hidden>
       <header class="hud-header">
         <div class="hud-wordmark"><svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11" stroke="currentColor"/><circle cx="14" cy="14" r="5" fill="currentColor"/><path d="M14 0v5m14 9h-5M14 28v-5M0 14h5" stroke="currentColor"/></svg><span>异潮<small>ABERRANT TIDE</small></span></div>
-        <div class="stage-heading"><div id="stage-name">初生海域</div><span id="stage-subtitle">第一阶段 · 生命的微光</span><span id="zone-name" class="zone-name">透光层</span></div>
+        <div class="stage-heading"><div id="stage-name">初生海域</div><span id="stage-subtitle">第一阶段 · 生命的微光</span><span id="zone-name" class="zone-name">透光层</span><span id="tide-name" class="tide-name">拂晓</span></div>
         <div class="hud-utility"><button id="camera-btn" class="utility-button" title="切换第一 / 第三人称视角"><span>第三人称</span><kbd>V</kbd></button><button id="sound-btn" class="icon-button" title="开关声音" aria-label="开关声音"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m11 5-5 4H3v6h3l5 4V5Zm4 4c2 2 2 4 0 6m3-9c4 3 4 9 0 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="pause-btn" class="icon-button" title="暂停游戏" aria-label="暂停游戏"><svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="M5 3v12M11 3v12" stroke="currentColor" stroke-width="2"/></svg></button></div>
       </header>
 
@@ -134,7 +134,7 @@
 
     <section id="end-screen" class="modal-screen" hidden aria-labelledby="end-title"><div class="modal-dialog end-dialog"><div id="end-eyebrow" class="modal-eyebrow">EVOLUTION COMPLETE</div><h2 id="end-title">深海记住了你。</h2><p id="end-description" class="modal-description">从一枚细胞开始，你改写了这片海洋的命运。</p><div id="end-stats" class="end-stats"></div><div class="end-actions"><button id="retry-btn" class="primary-button"><span>开始新的生命</span><span>↗</span></button><button id="end-menu-btn" class="text-button">返回主菜单</button></div></div></section>
 
-    <section id="biology-screen" class="modal-screen biology-screen" hidden aria-labelledby="biology-title"><div class="biology-dialog"><header class="biology-header"><div><div class="modal-eyebrow">LIVING OCEAN / FIELD NOTES</div><h2 id="biology-title">生命的<span>另一种可能</span></h2></div><button id="biology-close-btn" class="close-button" aria-label="关闭生命图鉴">×</button></header><nav class="biology-tabs" aria-label="生命图鉴分类"><button data-codex-tab="forms" class="active" aria-pressed="true">身体如何改变</button><button data-codex-tab="species" aria-pressed="false">海洋中的邻居</button><button data-codex-tab="ocean" aria-pressed="false">深度与食物网</button></nav><div id="biology-content" class="biology-content"></div><footer class="biology-footer"><span>阅读时世界暂停 · 按 B 或 ESC 返回</span><span>辐射异化与跨尺度成长为虚构设定</span></footer></div></section>
+    <section id="biology-screen" class="modal-screen biology-screen" hidden aria-labelledby="biology-title"><div class="biology-dialog"><header class="biology-header"><div><div class="modal-eyebrow">LIVING OCEAN / FIELD NOTES</div><h2 id="biology-title">生命的<span>另一种可能</span></h2></div><button id="biology-close-btn" class="close-button" aria-label="关闭生命图鉴">×</button></header><nav class="biology-tabs" aria-label="生命图鉴分类"><button data-codex-tab="forms" class="active" aria-pressed="true">身体如何改变</button><button data-codex-tab="species" aria-pressed="false">海洋中的邻居</button><button data-codex-tab="ocean" aria-pressed="false">深度与食物网</button><button data-codex-tab="notes" aria-pressed="false">野外笔记</button></nav><div id="biology-content" class="biology-content"></div><footer class="biology-footer"><span>阅读时世界暂停 · 按 B 或 ESC 返回</span><span>辐射异化与跨尺度成长为虚构设定</span></footer></div></section>
 
     <section id="help-screen" class="modal-screen" hidden aria-labelledby="help-title">
       <div class="modal-dialog help-dialog">
@@ -156,19 +156,23 @@
             <p>靠近菌膜、鱼群、鲸、海龟或人类潜水员按 <kbd>G</kbd> 附着；首次经历推动随机发育，普通食物不直接升级。海床、礁台、反应堆、舰船与大型生物都有实体碰撞；岛下核心须沿深处断层通道接近。</p>
           </div>
           <div>
-            <h3><span>04</span>随机抵达的本能</h3>
+            <h3><span>04</span>潮汐日与猎杀窗口</h3>
+            <p>海洋每五分钟走完一个<b>潮汐日</b>：拂晓与黄昏鱼群上浮、正午下潜、深夜最深也最凶。夜里异变能涨得更快，但捕食者的察觉范围也更大——什么时候去哪，是这一局的主要决定。<br />每种生物都有<b>破绽</b>：鱼群身后是侧线盲区，鲨鱼扑空后要重新回身，蟹只在蜕壳时甲壳发软。在破绽里命中造成 2–3 倍伤害，并写进<b>野外笔记</b>（<kbd>B</kbd> → 野外笔记），永久强化你对这种生物的下手。</p>
+          </div>
+          <div>
+            <h3><span>05</span>随机抵达的本能</h3>
             <p>器官随机长出，对应的操作也随机解锁：<kbd>撕咬</kbd>（左键，朝前重创单体并打断蓄力）、<kbd>喷射突进</kbd>（<kbd>Z</kbd>，撞开沿途生物）、<kbd>辐射脉冲</kbd>（<kbd>Q</kbd>，定向扇形并击退致晕）、按住 <kbd>C</kbd> <b>拟态</b>（收敛发光，捕食者锁定不到你）、按住 <kbd>X</kbd> <b>感电扫描</kbd>（看见周围生命的轮廓）。冲刺撞到生物会造成撞击伤害与眩晕。技能不可指定，但你可以决定去猎什么。</p>
           </div>
           <div>
-            <h3><span>05</span>追猎异变回声</h3>
+            <h3><span>06</span>追猎异变回声</h3>
             <p>每座活跃反应堆都由一只异变回声体供给共振，<b>每只都有一把钥匙</b>：折脊回声体会闪开辐射脉冲，只能贴近撕咬；诱光群落的假光会骗过撕咬，要用脉冲打散；压力蠕冠藏在暗处，要按住 <kbd>X</kbd> 扫描出真身，或按住 <kbd>C</kbd> 拟态引它过来。观察它从追踪进入蓄力，再从蓄力进入开壳；蓄力时按 <kbd>SPACE</kbd> 规避，开壳时切断连接。连接降到三成后按 <kbd>E</kbd> 可吞下弱点。开壳命中越多、追猎越快，1–3 级的异化收益越高。</p>
           </div>
           <div>
-            <h3><span>06</span>排放母体</h3>
+            <h3><span>07</span>排放母体</h3>
             <p>三座反应堆停机后，灰屿的排放母体现身：外甲上的三条触须<b>打不动</b> —— 辐射脉冲会被弹开，要用<b>撕咬</b>一条条切下来；再在喷发阶段用<b>脉冲</b>打散污染云（或按住 <kbd>C</kbd> 拟态硬扛）；最后趁核心张开的窗口撕咬它，或用冲刺撞击。母体死亡后灰屿的排放结构才暴露。</p>
           </div>
           <div>
-            <h3><span>07</span>三种收束</h3>
+            <h3><span>08</span>三种收束</h3>
             <p>巨兽路线：停堆、击败母体，成为 Lv.11 巨兽后靠近按 <kbd>E</kbd> 吞岛。寄生路线只对拥有寄生原基的个体开放：完成人类潜水员的神经寄生适应后，再接管港口泵站、海面实验舱与通信继电器。而最终收束由左上角的<b>海洋之息</b>决定：它记着你的猎杀与共生，走共生路线会变宽，走捕食路线会变窄，海水也会跟着变浑。<kbd>M</kbd> 查看异变记录，<kbd>B</kbd> 查看图鉴。</p>
           </div>
         </div>

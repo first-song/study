@@ -16,6 +16,7 @@ import { createAssimilatedOrgans, animateAssimilatedOrgans, createApexBody, anim
 import { animateHumanSettlement, createDiverEntityModel, animateDiverEntityModel, createParasiteNodeModel, animateParasiteNodeModel, createSurfaceFleet, animateSurfaceFleet, createResearchWreck, animateResearchWreck, nearestHumanDistance, consumeNearestHuman as consumeClosestHuman } from './human-models.js';
 import { humanBoatStates } from './human-navigation.js';
 import { islandCenter, islandSurfaceAt, islandDeepPassageAt } from './island.js';
+import { nightGlow, tideAt } from './tide.js';
 import { instinctTier } from './instincts.js';
 
 const TAU = Math.PI * 2;
@@ -138,6 +139,8 @@ export class OceanScene {
     this.scene.fog = new THREE.FogExp2(0x061924, .0115);
     this.environmentColor = new THREE.Color(0x061924);
     this.surfaceColor = new THREE.Color(0x2e8491);
+    this.tideTint = new THREE.Color(0x2e8491);
+    this.tideScratch = new THREE.Color();
     this.deepColor = new THREE.Color(0x020914);
     this.pollutionColor = new THREE.Color(0x432b24);
     this.localPollution = 0;
@@ -988,6 +991,9 @@ export class OceanScene {
     this.clock += dt;
     const time=this.clock,p=state.player;
     const depth=depthFor(p.y),darkness=THREE.MathUtils.smoothstep(depth,150,1150);
+    // 潮汐日：光照、水色与生物发光都跟着时段走。
+    const tide=tideAt(state.time);
+    this.tideTint.lerp(this.tideScratch.setHex(tide.surface),1-Math.exp(-dt*.5));
     const exposure=Math.min(1,exposureAt(state.entities,p)/3);
     // 生态崩坏也把水弄浑：不用新写任何着色器，分级 Pass 已经在那里。
     const decay=Math.max(0,Math.min(1,-(state.oceanBalance||0)/100));
@@ -1007,14 +1013,16 @@ export class OceanScene {
     this.ambient.groundColor.lerp(this.ambientGroundTarget,1-Math.exp(-dt*.65));
     this.rimTarget.setHex(biome?.id==='coral'?0xffc59b:biome?.id==='vents'?0xe08f73:biome?.id==='abyss'?0x7899ff:0x78b9d0);
     this.rimLight.color.lerp(this.rimTarget,1-Math.exp(-dt*.55));
+    this.surfaceColor.lerp(this.tideTint,1-Math.exp(-dt*.4));
     this.environmentColor.setHex(biome?.color||0x0b5365).lerp(this.surfaceColor,.34+(1-darkness)*.38);
     this.environmentColor.lerp(this.deepColor,darkness*.94);
     this.environmentColor.lerp(this.pollutionColor,this.localPollution*.3);
     this.scene.background.lerp(this.environmentColor,1-Math.exp(-dt*.4));
     this.scene.fog.color.copy(this.scene.background);
     this.scene.fog.density=.00225+darkness*.0076+this.localPollution*.0052;
-    this.sun.intensity=depth>=1000?0:3.9*Math.exp(-depth/430);
-    this.ambient.intensity=1.55*(1-darkness)+.28+.34*darkness;
+    this.sun.intensity=(depth>=1000?0:3.9*Math.exp(-depth/430))*tide.light;
+    this.ambient.intensity=(1.55*(1-darkness)+.28+.34*darkness)*(.82+.18*tide.light);
+    this.ambient.color.lerp(this.tideScratch.setHex(tide.ambient),1-Math.exp(-dt*.35));
     this.fillLight.intensity=.34*(1-darkness)+.08+.14*darkness;
     this.fillLight.color.lerp(this.ambient.color,1-Math.exp(-dt*.5));
     this.scene.environmentIntensity=.9*(1-darkness)+.2+.28*darkness;
@@ -1034,7 +1042,7 @@ export class OceanScene {
     if(this.lightShaftMaterial)this.lightShaftMaterial.uniforms.time.value=time;
 
     this.motes.visible=this.qualitySetting!=='low'&&p.y<WATER_SURFACE_Y-.5;
-    this.motes.material.opacity=.13+(1-darkness)*.105;
+    this.motes.material.opacity=.13+(1-darkness)*.105+nightGlow(state.time)*.12;
     this.surface.material.uniforms.time.value=time;
     this.surface.visible=depth<700;
     this.sky.material.uniforms.time.value=time;

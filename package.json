@@ -26,7 +26,8 @@
     "verify:desktop": "node scripts/verify-desktop.mjs",
     "pack:zip": "node scripts/make-single-exe.mjs && powershell -NoProfile -Command \"Compress-Archive -Path 'dist\\异潮.exe','build\\给朋友.txt' -DestinationPath 'dist\\异潮-试玩版.zip' -CompressionLevel Optimal -Force\"",
     "pack:single": "node scripts/make-single-exe.mjs",
-    "verify:single": "node scripts/verify-single-exe.mjs"
+    "verify:single": "node scripts/verify-single-exe.mjs",
+    "verify:v23": "node scripts/verify-v23.mjs"
   },
   "dependencies": {
     "three": "0.180.0"

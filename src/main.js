@@ -2,6 +2,7 @@ import { GameEngine, BRANCHES, STAGES } from './engine.js';
 import { OceanScene } from './scene.js';
 import { SPECIES, depthFor, WATER_SURFACE_Y } from './biology.js';
 import { renderCodex, updateEcologyHUD } from './ecology-ui.js';
+import { tideAt, tideLabel } from './tide.js';
 import { renderMutations, updateMutationHUD } from './mutation-records.js';
 import { createMouseLook } from './mouse-look.js';
 import { mountExpeditionUI, updateExpeditionUI } from './expedition-ui.js';
@@ -408,6 +409,10 @@ function updateBreathHUD(state) {
 
 function updateHUD() {  const state=engine.state,p=state.player,stage=STAGES[state.stage];
   text('stage-name',stage.name);text('stage-subtitle',stage.subtitle);
+  const tide=tideAt(state.time);
+  text('tide-name',`潮汐日 · ${tideLabel(state.time)}`);
+  const tideChip=$('tide-name');
+  if(tideChip){tideChip.classList.toggle('night',tide.id==='night');tideChip.classList.toggle('dusk',tide.id==='dusk');}
   text('level-value',String(p.level).padStart(2,'0'));
   const dominant=BRANCHES.reduce((best,b)=>p.branches[b.id]>p.branches[best.id]?b:best,BRANCHES[0]);
   text('form-name',p.level===1?'觉醒的单细胞':p.branches[dominant.id]?dominant.upgrades[p.branches[dominant.id]-1].name:'异化生命');
@@ -586,6 +591,9 @@ function events() {
     }
     if(event.type==='instinctFailed')toast(event.text);
     if(event.type==='echoResist'){toast(event.text,'danger');sound(150,.25,'square',.03);}
+    if(event.type==='huntWindow'){toast(event.text,'success');sound(760,.18,'triangle',.03);}
+    if(event.type==='fieldNote'){toast(event.text,'info');sound(680,.4,'sine',.038);}
+    if(event.type==='tideChanged'){toast(event.text,'info');sound(420,.3,'sine',.026);}
     if(event.type==='tendrilSevered'){sound(190,.5,'triangle',.055);ocean.effect('pulse',event,0xff9d7a);ocean.shake?.(.45);}
     if(event.type==='tendrilDamage')sound(150,.12,'square',.028);
     if(event.type==='tendrilWindup')sound(320,.3,'triangle',.035);

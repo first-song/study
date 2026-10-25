@@ -117,3 +117,17 @@ export function detectionModifier(state) {
 export function fearRadiusModifier(state) {
   return 1 + (-oceanBalance(state) / 100) * 0.8;
 }
+
+// 账目不只是结局分数，它是两种活法。
+//   猎杀路线（负）：撕咬更狠，但伤口几乎不愈合 —— 你只能靠不断进食撑住。
+//   共生路线（正）：伤害略低，但愈合极快，猎物也愿意让你靠近。
+// 这样"你要成为什么"由行为自然长出来，而不是由菜单选择。
+export function damageModifier(state) {
+  const balance = oceanBalance(state);
+  return balance <= 0 ? 1 + (-balance / 100) * 0.35 : 1 - (balance / 100) * 0.12;
+}
+
+export function regenModifier(state) {
+  const balance = oceanBalance(state);
+  return balance >= 0 ? 1 + (balance / 100) * 0.9 : 1 - (-balance / 100) * 0.45;
+}

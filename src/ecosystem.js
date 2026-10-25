@@ -104,7 +104,8 @@ export function expeditionObjective(state) {
     return '活性羽流正在失稳：停止滤食并撤离橙色核心，准备避开爆裂伤害';
   }
   if (bloom && !log.biofilms.length && state.time < 25) {
-    return '按 E 连续滤食附近的活性营养羽流：青绿色外壳安全，橙色核心加速异变；主线是靠近漂木菌膜按 G';
+    // 开局三十秒必须是一个决定，而不是一句"按 E"。
+    return '开局两条路：蓝色羽流按 E 滤食，稳但慢；橙色核心把异变能推得更快，代价是辐射与捕食压力一起上来。选一条，再去漂木菌膜按 G';
   }
   if (log.hostAdaptations.includes('diver') && log.parasiteNodes.length < PARASITE_SITE_DEFS.length) {
     return `寄生路线已开启：感染灰屿三处神经中继 ${log.parasiteNodes.length} / ${PARASITE_SITE_DEFS.length}`;

@@ -12,7 +12,9 @@ import { spawnPlanktonBloom, updatePlanktonBloom } from './bloom-system.js';
 import { ABERRANT_ECHO_DEFS, ECHO_PHASE_LABELS, ECHO_RESIST, ECHO_STRATEGY, ECHO_TIMING, echoPhaseAt, echoVulnerability } from './echo-system.js';
 import { INSTINCTS, SYMBIOSIS_INSTINCTS, initialInstincts, instinctAvailable, instinctDefinition, instinctRank, instinctTier } from './instincts.js';
 import { MOTHER_PHASE, MOTHER_RULES, createTendrils, damageMother, isMother, updateMother } from './emissions-mother.js';
-import { OCEAN_OUTCOME, classifyOutcome, detectionModifier, fearRadiusModifier, oceanBalance } from './ocean-breath.js';
+import { OCEAN_OUTCOME, classifyOutcome, damageModifier, detectionModifier, fearRadiusModifier, oceanBalance, regenModifier } from './ocean-breath.js';
+import { tideAt } from './tide.js';
+import { FIELD_NOTES, hasNote, huntWindowAt, noteForSpecies, windowDamage } from './hunting.js';
 
 export const BRANCHES = [
   {
@@ -441,6 +443,8 @@ export class GameEngine {
       entities: [],
       ecology: { encounters: [], predations: 0, killsBySpecies: {} },
       oceanBalance: 0, oceanOutcome: null,
+      fieldNotes: [],
+      tideId: tideAt(0).id,
       expedition: initialExpedition(),
       stats: { eaten: 0, isotopes: 0, kills: 0, preyKills: 0, evolutions: 0, damageTaken: 0, distance: 0 },
     };
@@ -488,6 +492,7 @@ export class GameEngine {
     const { radiation: r, symbiosis: s, devour: d } = p.branches;
     const m = p.mutations;
     state.time += dt;
+    this._updateTide();
     this._updateHumanPatrol(dt);
     if (state.mode !== 'playing') return;
     this._updateReactors(dt);
@@ -558,7 +563,7 @@ export class GameEngine {
       const arc = tier.arc;
       p.energy -= tier.cost;
       p.cooldowns.pulse = tier.cooldown;
-      const damage = p.damage * tier.damageFactor * (1 + r * p.radiation * 0.0018) * ((p.overloadBurst || 0) > 0 ? 1.35 : 1);
+      const damage = p.damage * tier.damageFactor * (1 + r * p.radiation * 0.0018) * ((p.overloadBurst || 0) > 0 ? 1.35 : 1) * this._damageScale();
       const direction = { ...p.facing };
       this._emit('pulse', '辐射脉冲', { x: p.x, y: p.y, z: p.z, radius, arc, dir: direction });
       for (const entity of state.entities) {
@@ -729,7 +734,7 @@ export class GameEngine {
     p.radiation -= converted;
     p.energy += converted * 4;
     if (p.hurtTime <= 0 && p.nutrition > 5 && p.hp < p.maxHp) {
-      const healed = Math.min(p.maxHp - p.hp, p.regen * reserve * dt);
+      const healed = Math.min(p.maxHp - p.hp, p.regen * reserve * dt * regenModifier(state));
       p.hp += healed;
       p.nutrition = Math.max(0, p.nutrition - m.repair * 0.07 * dt * healed / (p.regen * reserve * dt));
     }
@@ -751,16 +756,24 @@ export class GameEngine {
         const inArc = p.dashTime > 0 || (jetTier && coneContains(p.jetDir, p, entity, jetTier.arc, entity.radius));
         if (dist <= reach && inArc) {
           p.dashHits.push(entity.id);
+          const window = this._huntWindow(entity);
+          const multiplier = windowDamage(window, this.state.fieldNotes);
           if (p.dashTime > 0) {
-            this._hurtEnemy(entity, (p.damage + p.mutations.spines * 5) * 1.6, { x: p.x, y: p.y, z: p.z }, 'melee');
+            this._hurtEnemy(entity, (p.damage + p.mutations.spines * 5) * 1.6 * multiplier * this._damageScale(), { x: p.x, y: p.y, z: p.z }, 'melee');
             this._stunEntity(entity, 0.8);
             this._knockback(entity, 2.4, direction);
             this._emit('dashImpact', '冲刺撞击', { x: entity.x, y: entity.y, z: entity.z, kind: entity.type });
           } else {
-            this._hurtEnemy(entity, p.damage * jetTier.damageFactor, { x: p.x, y: p.y, z: p.z }, 'melee');
+            this._hurtEnemy(entity, p.damage * jetTier.damageFactor * multiplier * this._damageScale(), { x: p.x, y: p.y, z: p.z }, 'melee');
             this._stunEntity(entity, 0.5);
             this._knockback(entity, jetTier.push, direction);
             this._emit('jetImpact', '水压撞开', { x: entity.x, y: entity.y, z: entity.z, kind: entity.type });
+          }
+          if (window.open && !entity.dead) {
+            this._recordFieldNote(entity);
+            this._emit('huntWindow', `${window.label} · 伤害 ×${multiplier.toFixed(1)}`, {
+              x: entity.x, y: entity.y, z: entity.z, label: window.label, entityId: entity.id, multiplier,
+            });
           }
           if (state.mode !== 'playing') break;
         }
@@ -952,6 +965,32 @@ export class GameEngine {
     entity.vz = (entity.vz || 0) + (direction.z / length) * step;
   }
 
+  // 海洋之息决定你这一局是"更狠"还是"更耐"。
+  _damageScale() {
+    return damageModifier(this.state);
+  }
+
+  // 生物此刻是否露了破绽。窗口是纯时间/朝向函数，AI 不需要额外记账。
+  _huntWindow(entity) {
+    return huntWindowAt(entity, this.state.time, this.state.player);
+  }
+
+  // 第一次在窗口里命中同一种生物，就把它写进野外笔记；笔记给的加成是永久的。
+  _recordFieldNote(entity) {
+    const note = noteForSpecies(entity.type);
+    if (!note) return null;
+    if (!Array.isArray(this.state.fieldNotes)) this.state.fieldNotes = [];
+    if (this.state.fieldNotes.includes(note.id)) return null;
+    this.state.fieldNotes.push(note.id);
+    const p = this.state.player;
+    if (note.bonus.kind === 'dashRefund') p.cooldowns.dash = 0;
+    if (note.bonus.kind === 'resource') p.biomass += note.bonus.value;
+    this._emit('fieldNote', `野外笔记 · ${note.title}：${note.text}`, {
+      id: note.id, title: note.title, text: note.text, species: entity.type,
+    });
+    return note;
+  }
+
   _resolveBite() {
     const p = this.state.player;
     const tier = instinctTier(p, 'bite');
@@ -982,7 +1021,17 @@ export class GameEngine {
       if (distance(p, entity) > reach) continue;
       if (!coneContains(direction, p, entity, tier.arc, entity.radius)) continue;
       hits++;
-      this._hurtEnemy(entity, p.damage * tier.damageFactor + p.mutations.spines * 4, { x: p.x, y: p.y, z: p.z }, 'melee');
+      // 猎杀窗口：打中破绽的伤害是普通命中的两倍多，并写下一条野外笔记。
+      const window = this._huntWindow(entity);
+      const multiplier = windowDamage(window, this.state.fieldNotes);
+      this._hurtEnemy(entity, (p.damage * tier.damageFactor + p.mutations.spines * 4) * multiplier * this._damageScale(), { x: p.x, y: p.y, z: p.z }, 'melee');
+      if (window.open && !entity.dead) {
+        this._recordFieldNote(entity);
+        this._emit('huntWindow', `${window.label} · 伤害 ×${multiplier.toFixed(1)}`, {
+          x: entity.x, y: entity.y, z: entity.z, label: window.label, entityId: entity.id, multiplier,
+        });
+        this._hitstop(.1, .12);
+      }
       this._stunEntity(entity, 0.6);
       this._knockback(entity, 1.6, direction);
       if (tier.refund) p.energy = Math.min(p.maxEnergy, p.energy + tier.refund);
@@ -1428,6 +1477,18 @@ export class GameEngine {
     return true;
   }
 
+  // 潮汐日：只在时段切换时发一次事件，HUD 靠 state.time 自己算当前时段。
+  _updateTide() {
+    const tide = tideAt(this.state.time);
+    if (this.state.tideId === tide.id) return;
+    const previous = this.state.tideId;
+    this.state.tideId = tide.id;
+    if (!previous) return;
+    this._emit('tideChanged', `潮汐日 · ${tide.name}：${tide.line}`, {
+      id: tide.id, name: tide.name, line: tide.line, cycle: tide.cycle,
+    });
+  }
+
   _updateReactors(dt) {
     const p = this.state.player;
     for (const entity of this.state.entities) if (entity.type === 'reactor') {
@@ -1608,7 +1669,8 @@ export class GameEngine {
   _gainMutationEnergy(amount) {
     if (!finite(amount) || amount <= 0) return 0;
     const p = this.state.player;
-    const gain = Math.min(amount, 300);
+    // 夜里辐射带来的异变更快：风险与收益都集中在同一个时段。
+    const gain = Math.min(amount * tideAt(this.state.time).mutationGain, 300);
     p.mutationEnergy += gain;
     this._resolveMutations();
     return gain;
@@ -1663,6 +1725,8 @@ export class GameEngine {
       const legacyEchoes = !Array.isArray(save.state?.expedition?.echoesPacified) ||
         !Array.isArray(save.state?.entities) ||
         !save.state.entities.some(entity=>entity.type==='echo');
+      // 野外笔记是 V23 新增的；旧存档没有这个字段，补一个空数组即可。
+      if (!Array.isArray(save.state.fieldNotes)) save.state.fieldNotes = [];
       if (legacyExpedition) {
         save = JSON.parse(JSON.stringify(save));
         if (!save.state.player || !Array.isArray(save.state.entities)) return false;
@@ -2246,6 +2310,8 @@ export class GameEngine {
   }
 
   _updateWildlife(e, dt, playerDistance) {
+    // 潮汐日决定猎物是否上浮、捕食者是否更凶。
+    const tide = tideAt(this.state.time);
     const p = this.state.player;
     const spec = SPECIES[e.type];
     if (playerDistance < p.senseRadius && !this.state.ecology.encounters.includes(e.type)) {
@@ -2300,7 +2366,12 @@ export class GameEngine {
     };
     if (e.type === 'fish' || e.type === 'lanternfish') {
       threat = nearest(['shark', 'squid', 'jelly', 'angler'], 23);
-      if (p.attachment?.entityId !== e.id && p.level >= 5 && playerDistance < 10 * this._mimicFactor() && (!threat || playerDistance < distance(e, threat))) threat = p;
+      if (p.attachment?.entityId !== e.id && p.level >= 5 && playerDistance < 10 * this._mimicFactor() * tide.aggression && (!threat || playerDistance < distance(e, threat))) threat = p;
+      // 垂直迁移：黄昏与深夜鱼群上浮觅食，正午下沉。
+      // homeY 在第一次更新时记录，所以这是一个回到"家"的软约束，而不是恒定推力。
+      const homeY = e.homeY ?? (e.homeY = e.y);
+      const migrationTarget = clamp(homeY + tide.preyRise, spec.minY + 1, spec.maxY - 1);
+      dy += (migrationTarget - e.y) * 0.02;
       const fearRadius = 7 * fearRadiusModifier(this.state);
       if (!threat && p.attachment?.entityId !== e.id && playerDistance < fearRadius && playerDistance > .001) {
         const avoid=(fearRadius-playerDistance)/fearRadius;
@@ -2376,7 +2447,7 @@ export class GameEngine {
       if (!threat && e.hunger > 0.3) {
         target = nearest(['fish', 'lanternfish'], e.type === 'shark' ? 38 : 30);
         // Large predators favor their normal prey. A tiny cell is below their feeding scale.
-        if (!p.attachment && p.level >= 5 && playerDistance < (15 + p.mutations.photophore * 8 + (p.feedTime > 0 ? 8 : 0)) * this._mimicFactor() && (!target || playerDistance < distance(e, target) * 0.65)) target = p;
+        if (!p.attachment && p.level >= 5 && playerDistance < (15 + p.mutations.photophore * 8 + (p.feedTime > 0 ? 8 : 0)) * this._mimicFactor() * tide.aggression && (!target || playerDistance < distance(e, target) * 0.65)) target = p;
       }
     }
     if (e.variant === 'crooked') { dx += Math.cos(this.state.time * 2.4 + e.seed) * 0.65; dz += Math.sin(this.state.time * 2.4 + e.seed) * 0.65; }
@@ -2466,6 +2537,7 @@ export class GameEngine {
     }
     if (!stunned && target && !target.dead && distance(e, target) < e.radius + (target === p ? p.size : target.radius) + 0.7 && e.attackTime <= 0) {
       e.attackTime = e.type === 'whale' ? 1.2 : 1.5;
+      e.recoveryUntil = this.state.time + 1.7;
       if (target === p) this._damage(e.damage * phenotype.damage, `${spec.name}捕食`);
       else this._predation(e, target);
     }
@@ -2639,7 +2711,7 @@ export class GameEngine {
     const conspicuous = (p.mutations.photophore > 0 ? 1.3 : 1) * (p.dashTime > 0 ? 1.35 : 1);
     const stealth = (this.schoolCovered ? .58 : 1) * mimic;
     const baseDetect = (e.type === 'drone' ? 35 + p.mutations.photophore * 8 : 27 + p.mutations.photophore * 8)
-      * detectionModifier(this.state);
+      * detectionModifier(this.state) * tideAt(this.state.time).aggression;
     // 发育到 Lv5 之后普通捕食者会避开你；但只要你显形，它们照样会来。
     const detection = p.level >= 5
       ? (conspicuous > 1 ? 20 * conspicuous * stealth : 0)
@@ -2680,6 +2752,8 @@ export class GameEngine {
     if (e.striking && e.attackWindup <= 0) {
       e.striking = false;
       e.attackTime = 1.7;
+      // 扑击落空后有一小段回身时间：这是它的破绽。
+      e.recoveryUntil = this.state.time + 1.4;
       if (!e.dead && dist < e.radius + p.size + 1.3) {
         this._damage(e.damage, e.type === 'drone' ? '巡逻机械攻击' : '异变捕食者攻击');
         // 被咬中会被推开：连着几下就能把玩家逼进死角。

@@ -1,4 +1,5 @@
 import { LIFE_STAGES, SPECIES, ZONES, BIOLOGY_SOURCES, lifeStageFor, zoneFor, depthFor } from './biology.js';
+import { FIELD_NOTES } from './hunting.js';
 import { VARIANTS } from './ecosystem.js';
 
 const abnormalForms = {
@@ -50,12 +51,24 @@ export function updateEcologyHUD(state) {
   }
 }
 
+function bonusLabel(bonus) {
+  if (!bonus) return '—';
+  if (bonus.kind === 'damage') return `该物种的破绽伤害再 +${Math.round(bonus.value * 100)}%`;
+  if (bonus.kind === 'dashRefund') return '打中破绽时立刻刷新冲刺';
+  if (bonus.kind === 'resource') return `打中破绽额外获得 ${bonus.value} 生物质`;
+  if (bonus.kind === 'safety') return '破绽窗口内不再被它反伤';
+  return '—';
+}
+
 export function renderCodex(container,state,tab='forms') {
   const phase=lifeStageFor(state.player.level),encounters=state.ecology?.encounters||[];
   if(tab==='forms') {
     container.innerHTML=`<div class="codex-intro"><p class="codex-kicker">从一个细胞，到一个身体</p><p>进化不仅是体型和伤害。运动、消化与物质交换，需要不同的身体结构来支持。</p></div><div class="life-track">${LIFE_STAGES.map((body,index)=>`<article class="life-card ${phase===index?'current':''}"><div class="life-card-index"><span>0${index+1}</span><small>LV.${body.minLevel}${index<3?'–'+(body.minLevel+1):'+'}</small>${phase===index?'<em>当前结构</em>':''}</div><h3>${body.name}</h3><span class="size-label">${body.sizeLabel}</span><p>${body.summary}</p><div class="organ-tags">${body.organs.map(organ=>`<span>${organ}</span>`).join('')}</div><dl><dt>如何移动</dt><dd>${body.locomotion}</dd><dt>能够吃什么</dt><dd>${body.feeding}</dd><dt>生存代价</dt><dd>${body.tradeoff}</dd></dl></article>`).join('')}</div><div class="codex-scale-note"><strong>观察尺度</strong><p>微小细胞与养分经过放大，大型动物的尺寸也被压缩，便于在同一场景中观察。摄食资格由发育阶段决定，不能用屏幕上的大小判断能否吞食。单局内的快速异化是游戏设定，并非自然进化的速度或必然路线。</p></div>`;
   } else if(tab==='species') {
     container.innerHTML=`<div class="codex-intro"><p class="codex-kicker">你只是食物网中的一员</p><p>已观测 ${WILDLIFE.filter(type=>encounters.includes(type)).length} / ${WILDLIFE.length} 类海洋动物。它们会觅食、巡游、躲避与换气。</p></div><div class="species-grid">${WILDLIFE.map(type=>{const s=SPECIES[type];return `<article class="species-card" style="--species-color:${s.color}"><div class="species-top"><span class="species-symbol" aria-hidden="true">${icons[type]}</span><small>${encounters.includes(type)?'已观测':'尚未靠近'}</small></div><h3>${s.name}</h3><span class="species-role">${s.role}</span><p>${s.description}</p><dl><dt>食物</dt><dd>${s.diet}</dd><dt>你的摄食门槛</dt><dd>${s.huntable===false?'生态巨兽 · 不参与玩家战斗':`Lv.${s.minPlayerLevel} · ${s.minPlayerLevel>=7?'分化异化体':'多细胞幼体'}`}</dd></dl></article>`;}).join('')}<article class="species-card snow-card"><div class="species-top"><span class="species-symbol">✧</span><small>所有阶段都可利用</small></div><h3>海洋雪</h3><span class="species-role">来自上层的有机碎屑</span><p>${SPECIES.marineSnow.description}</p><dl><dt>深海生存</dt><dd>下潜后寻找浅色下沉颗粒，补充营养；辐射物质无法替代食物。</dd></dl></article><article class="species-card micro-card" style="--species-color:#79d9bd"><div class="species-top"><span class="species-symbol">◌</span><small>周围持续存在</small></div><h3>微观生命群落</h3><span class="species-role">细菌 · 硅藻 · 纤毛虫 · 细胞群体</span><p>水体里不只有玩家：细长的杆状细菌、放射形硅藻、带纤毛运动的原生生物，以及由多个细胞组成球状群体的浮游生命会随水流漂移。</p><dl><dt>观察方式</dt><dd>留意镜头附近缓慢漂移的小型透明轮廓。</dd><dt>生态意义</dt><dd>它们参与微型食物网，也让海洋不只由大型动物构成。</dd></dl></article><article class="species-card human-card" style="--species-color:${SPECIES.diver.color}"><div class="species-top"><span class="species-symbol" aria-hidden="true">⌂</span><small>灰屿人类设施</small></div><h3>灰屿科研人员</h3><span class="species-role">表层宿主 · 替代终局入口</span><p>码头上的人类维持排放、采样与通信。游到表层后可附着取样潜水员完成神经寄生；三类岛上中继被接管后，灰屿会停摆而不是被吞没。</p><dl><dt>接触方式</dt><dd>上浮至海平面，靠近黄灯潜水员按 G</dd><dt>终局条件</dt><dd>完成宿主适应后感染三处神经中继</dd></dl></article></div>`;
+  } else if(tab==='notes') {
+    const notes=Array.isArray(state.fieldNotes)?state.fieldNotes:[];
+    container.innerHTML=`<div class="codex-intro"><p class="codex-kicker">观察就是武器</p><p>每种生物都有露破绽的一刻：鱼群的盲区、鲨鱼扑空后的回身、蟹蜕壳的软壳。第一次在那一刻打中它，你会把这件事记下来；笔记带来的加成是永久的。</p><p class="note-progress">已记录 ${notes.length} / ${FIELD_NOTES.length}</p></div><div class="field-note-grid">${FIELD_NOTES.map(note=>{const unlocked=notes.includes(note.id);const speciesName=note.species.map(type=>SPECIES[type]?.name||type).join(' / ');return `<article class="field-note ${unlocked?'':'locked'}"><span class="note-species">${speciesName}</span><h3>${unlocked?note.title:'尚未记录的习性'}</h3><p>${unlocked?note.text:'靠近它、观察它，并在它露出破绽的那一刻下手。'}</p><div class="note-bonus">${unlocked?`永久加成：${bonusLabel(note.bonus)}`:'—'}</div></article>`;}).join('')}</div>`;
   } else {
     container.innerHTML=`<div class="codex-intro"><p class="codex-kicker">阳光有边界，生命没有</p><p>越深，获取食物的方式越重要。鲸类跨越水层，海洋雪将上层的有机物带向深处。</p></div><div class="ocean-zones">${ZONES.map((zone,index)=>`<article class="zone-card zone-${zone.id}"><span class="zone-number">0${index+1}</span><div><h3>${zone.name}</h3><small>${zone.range}</small><p>${zone.description}</p>${index===0?'<span class="zone-trait">共生分支 ≥ 2 阶：获得光合营养补充</span>':'<span class="zone-trait">无光合营养补充 · 依靠摄食</span>'}</div></article>`).join('')}</div><div class="food-web"><strong>一条会发生的食物链</strong><p>浮游生物 <span>→</span> 鱼群 <span>→</span> 深海鱿鱼 <span>→</span> 潜游齿鲸</p><small>箭头表示被捕食。水母和鲨鱼也参与其中，海洋雪则为多个层次补充有机物。</small></div><div class="codex-scale-note"><strong>依据与想象</strong><p>膜交换、营养需求、光照限制和捕食关系参考生物规律；智慧觉醒、辐射能力及单局内的身体重塑属于虚构设定。深度与空间在场景中压缩呈现。</p><div class="biology-sources">${BIOLOGY_SOURCES.map(source=>`<a href="${source.url}" target="_blank" rel="noreferrer">${source.title} ↗</a>`).join('')}</div></div>`;
   }
